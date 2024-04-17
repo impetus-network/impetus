@@ -1,0 +1,6 @@
+[toolchain]
+# Stable
+channel   = "1.77.2" # rustc 1.75.0 (82e1608df 2023-12-21)
+components = ["cargo", "clippy", "rustc", "rustfmt", "rust-src"]
+profile    = "minimal"
+targets    = ["wasm32-unknown-unknown"]
