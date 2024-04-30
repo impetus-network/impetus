@@ -1,5 +1,5 @@
 [package]
-name = "frontier-template-runtime"
+name = "local-runtime"
 version = "0.0.0"
 license = "Unlicense"
 description = "A fresh FRAME-based Substrate runtime, ready for hacking."

@@ -1,7 +1,8 @@
 [workspace]
 members = [
 	"node",
-	"runtime",
+	"runtime/local",
+	"runtime/impetus",
 
 ]
 resolver = "2"
@@ -160,7 +161,7 @@ pallet-hotfix-sufficients = { git = "https://github.com/polkadot-evm/frontier", 
 # Frontier Utility
 precompile-utils = { git = "https://github.com/polkadot-evm/frontier", branch = "polkadot-v1.9.0", default-features = false }
 # Frontier Template
-frontier-template-runtime = { path = "runtime", default-features = false }
+impetus-runtime = { path = "runtime/impetus", default-features = false }
 
 [profile.release]
 # Substrate runtime requires unwinding.
