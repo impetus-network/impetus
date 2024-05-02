@@ -8,3 +8,5 @@ settings
 
 http://localhost:9944
 chainId: 42
+
+--pruning=archive
