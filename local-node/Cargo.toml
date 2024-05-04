@@ -1,5 +1,5 @@
 [package]
-name = "impetus-node"
+name = "local-node"
 version = "0.0.0"
 license = "Unlicense"
 build = "build.rs"
@@ -97,10 +97,10 @@ rocksdb = [
 	"fc-db/rocksdb",
 	"fc-mapping-sync/rocksdb",
 	"fc-rpc/rocksdb",
-	"impetus-runtime/with-rocksdb-weights",
+	"local-runtime/with-rocksdb-weights",
 ]
 paritydb = [
-	"impetus-runtime/with-paritydb-weights",
+	"local-runtime/with-paritydb-weights",
 ]
 sql = [
 	"fc-db/sql",
@@ -112,5 +112,5 @@ runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
-	"impetus-runtime/runtime-benchmarks",
+	"local-runtime/runtime-benchmarks",
 ]

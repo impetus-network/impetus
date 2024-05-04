@@ -1,9 +1,9 @@
 [workspace]
 members = [
-	"node",
+	"local-node",
 	"runtime/local",
-	"runtime/impetus",
-
+	# "runtime/impetus",
+	"primitives",
 ]
 resolver = "2"
 
@@ -178,7 +178,8 @@ pallet-hotfix-sufficients = { git = "https://github.com/polkadot-evm/frontier", 
 # Frontier Utility
 precompile-utils = { git = "https://github.com/polkadot-evm/frontier", branch = "polkadot-v1.9.0", default-features = false }
 # Frontier Template
-impetus-runtime = { path = "runtime/impetus", default-features = false }
+primitives = { path = "primitives", default-features = false }
+# impetus-runtime = { path = "runtime/impetus", default-features = false }
 local-runtime = { path = "runtime/local", default-features = false }
 
 [profile.release]

@@ -16,7 +16,7 @@ use sp_api::ConstructRuntimeApi;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::U256;
 // Runtime
-use impetus_runtime::{opaque::Block, Hash, TransactionConverter};
+use local_runtime::{opaque::Block, Hash, TransactionConverter};
 
 use crate::{
 	cli::Sealing,
@@ -635,7 +635,7 @@ where
 			inherent_data: &mut sp_inherents::InherentData,
 		) -> Result<(), sp_inherents::Error> {
 			TIMESTAMP.with(|x| {
-				*x.borrow_mut() += impetus_runtime::SLOT_DURATION;
+				*x.borrow_mut() += local_runtime::SLOT_DURATION;
 				inherent_data.put_data(sp_timestamp::INHERENT_IDENTIFIER, &*x.borrow())
 			})
 		}
@@ -695,7 +695,7 @@ pub async fn build_full(
 	eth_config: EthConfiguration,
 	sealing: Option<Sealing>,
 ) -> Result<TaskManager, ServiceError> {
-	new_full::<impetus_runtime::RuntimeApi, TemplateRuntimeExecutor>(
+	new_full::<local_runtime::RuntimeApi, TemplateRuntimeExecutor>(
 		config, eth_config, sealing,
 	)
 	.await
@@ -722,7 +722,7 @@ pub fn new_chain_ops(
 		task_manager,
 		other,
 		..
-	} = new_partial::<impetus_runtime::RuntimeApi, TemplateRuntimeExecutor, _>(
+	} = new_partial::<local_runtime::RuntimeApi, TemplateRuntimeExecutor, _>(
 		config,
 		eth_config,
 		build_aura_grandpa_import_queue,
