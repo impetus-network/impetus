@@ -78,6 +78,8 @@ fp-account = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = ["default"] }
 fp-evm = { workspace = true, features = ["default"] }
 fp-rpc = { workspace = true, features = ["default"] }
+
+primitives = { workspace = true }
 local-runtime = { workspace = true, features = ["std"] }
 
 [build-dependencies]

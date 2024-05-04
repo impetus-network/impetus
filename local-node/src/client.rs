@@ -2,7 +2,7 @@
 use sc_executor::{NativeElseWasmExecutor, NativeExecutionDispatch, NativeVersion};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 // Local
-use local_runtime::{opaque::Block, AccountId, Balance, Nonce};
+use primitives::{Block, AccountId, Balance, Nonce};
 
 use crate::eth::EthCompatRuntimeApiCollection;
 

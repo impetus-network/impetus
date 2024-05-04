@@ -16,7 +16,8 @@ use sp_api::ConstructRuntimeApi;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_core::U256;
 // Runtime
-use local_runtime::{opaque::Block, Hash, TransactionConverter};
+use primitives::{Block, Hash};
+use local_runtime::TransactionConverter;
 
 use crate::{
 	cli::Sealing,
