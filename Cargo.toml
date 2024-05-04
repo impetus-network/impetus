@@ -2,7 +2,7 @@
 members = [
 	"local-node",
 	"runtime/local",
-	# "runtime/impetus",
+	"runtime/impetus",
 	"primitives",
 ]
 resolver = "2"
