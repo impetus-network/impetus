@@ -39,7 +39,7 @@ use frame_support::{
 	derive_impl,
 	genesis_builder_helper::{build_config, create_default_config},
 	parameter_types,
-	traits::{ConstBool, ConstU32, ConstU8, KeyOwnerProofSystem, FindAuthor, OnFinalize, OnTimestampSet},
+	traits::{ConstU32, ConstU8, KeyOwnerProofSystem, FindAuthor, OnFinalize, OnTimestampSet},
 	weights::{constants::WEIGHT_REF_TIME_PER_MILLIS, IdentityFee, Weight},
 };
 use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter};

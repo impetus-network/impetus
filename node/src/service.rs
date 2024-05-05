@@ -7,7 +7,7 @@ use futures::{channel::mpsc, prelude::*};
 use prometheus_endpoint::Registry;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
-use sc_consensus_babe::{BabeLink, BabeWorkerHandle, SlotProportion};
+use sc_consensus_babe::{BabeLink, SlotProportion};
 use sc_executor::NativeExecutionDispatch;
 use sc_network_sync::strategy::warp::{WarpSyncParams, WarpSyncProvider};
 use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
@@ -24,7 +24,7 @@ use crate::{
 	client::{BaseRuntimeApiCollection, FullBackend, FullClient, RuntimeApiCollection},
 	eth::{
 		new_frontier_partial, spawn_frontier_tasks, BackendType, EthCompatRuntimeApiCollection,
-		FrontierBackend, FrontierBlockImport, FrontierPartialComponents,
+		FrontierBackend, FrontierPartialComponents,
 	},
 };
 pub use crate::{
@@ -205,8 +205,8 @@ where
 	RuntimeApi::RuntimeApi: RuntimeApiCollection,
 	Executor: NativeExecutionDispatch + 'static,
 {
-	let frontier_block_import =
-		FrontierBlockImport::new(grandpa_block_import.clone(), client.clone());
+	// let frontier_block_import =
+	// 	FrontierBlockImport::new(grandpa_block_import.clone(), client.clone());
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
 		sc_consensus_babe::configuration(&*client)?,
 		grandpa_block_import.clone(),
