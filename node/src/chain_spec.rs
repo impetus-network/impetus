@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, str::FromStr};
 use hex_literal::hex;
 // Substrate
 use sc_chain_spec::{ChainType, Properties};
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 #[allow(unused_imports)]
 use sp_core::ecdsa;
@@ -11,7 +11,8 @@ use sp_core::{Pair, Public, H160, U256};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 // Frontier
 use impetus_runtime::{
-	AccountId, Balance, RuntimeGenesisConfig, SS58Prefix, Signature, WASM_BINARY,
+	AccountId, Balance, RuntimeGenesisConfig, SS58Prefix, Signature, BABE_GENESIS_EPOCH_CONFIG,
+	WASM_BINARY,
 };
 
 // The URL for the telemetry server.
@@ -40,9 +41,9 @@ where
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
-	(get_from_seed::<AuraId>(s), get_from_seed::<GrandpaId>(s))
+/// Generate an Babe authority key.
+pub fn authority_keys_from_seed(s: &str) -> (BabeId, GrandpaId) {
+	(get_from_seed::<BabeId>(s), get_from_seed::<GrandpaId>(s))
 }
 
 fn properties() -> Properties {
@@ -113,7 +114,7 @@ pub fn local_testnet_config() -> ChainSpec {
 fn testnet_genesis(
 	sudo_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
+	initial_authorities: Vec<(BabeId, GrandpaId)>,
 	chain_id: u64,
 	enable_manual_seal: bool,
 ) -> serde_json::Value {
@@ -170,7 +171,10 @@ fn testnet_genesis(
 				.map(|k| (k, 1_000_000 * UNITS))
 				.collect::<Vec<_>>()
 		},
-		"aura": { "authorities": initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>() },
+		"babe": { 
+			"authorities": initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>(),
+			"epoch_config": BABE_GENESIS_EPOCH_CONFIG
+		},
 		"grandpa": { "authorities": initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>() },
 		"evmChainId": { "chainId": chain_id },
 		"evm": { "accounts": evm_accounts },
