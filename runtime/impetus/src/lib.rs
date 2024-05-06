@@ -12,6 +12,13 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 /// Constant values used within the runtime.
 pub mod constants;
 use scale_codec::{Decode, Encode};
+use pallet_election_provider_multi_phase::SolutionAccuracyOf;
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use frame_election_provider_support::{
+    bounds::ElectionBoundsBuilder, onchain, BalancingConfig, ElectionDataProvider,
+    SequentialPhragmen, VoteWeight,
+};
+use frame_system::EnsureRoot;
 use sp_api::impl_runtime_apis;
 use sp_consensus_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use sp_core::{
@@ -24,6 +31,7 @@ use sp_runtime::{
 		BlakeTwo256, Block as BlockT, DispatchInfoOf, Dispatchable, Get, IdentityLookup, NumberFor,
 		One, PostDispatchInfoOf, UniqueSaturatedInto,
 	},
+	curve::PiecewiseLinear,
 	transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
 	ApplyExtrinsicResult, ConsensusEngineId, ExtrinsicInclusionMode, OpaqueExtrinsic, Perbill,
 	Permill,
@@ -204,6 +212,10 @@ impl pallet_babe::Config for Runtime {
 	// TODO pallet_babe::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
 }
 
+impl pallet_authority_discovery::Config for Runtime {
+	type MaxAuthorities = MaxAuthorities;
+}
+
 impl pallet_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
@@ -278,6 +290,24 @@ impl pallet_sudo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
 	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Self>;
+}
+
+parameter_types! {
+    pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+    pub const MaxKeys: u32 = 10_000;
+    pub const MaxPeerInHeartbeats: u32 = 10_000;
+}
+
+impl pallet_im_online::Config for Runtime {
+    type AuthorityId = ImOnlineId;
+    type RuntimeEvent = RuntimeEvent;
+    type NextSessionRotation = Babe;
+    type ValidatorSet = Historical;
+    type ReportUnresponsiveness = Offences;
+    type UnsignedPriority = ImOnlineUnsignedPriority;
+    type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
+    type MaxKeys = MaxKeys;
+    type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
 }
 
 impl pallet_evm_chain_id::Config for Runtime {}
@@ -380,6 +410,24 @@ impl pallet_hotfix_sufficients::Config for Runtime {
 	type WeightInfo = pallet_hotfix_sufficients::weights::SubstrateWeight<Self>;
 }
 
+// voter bags
+parameter_types! {
+    pub const BagThresholds: &'static [u64] = &voter_bags::THRESHOLDS;
+}
+
+type VoterBagsListInstance = pallet_bags_list::Instance1;
+
+impl pallet_bags_list::Config<VoterBagsListInstance> for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    /// The voter bags-list is loosely kept up to date, and the real source of truth for the score
+    /// of each node is the staking pallet.
+    type ScoreProvider = Staking;
+    type BagThresholds = BagThresholds;
+    type Score = VoteWeight;
+    type WeightInfo = pallet_bags_list::weights::SubstrateWeight<Runtime>;
+}
+
+
 impl pallet_session::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ValidatorId = <Self as frame_system::Config>::AccountId;
@@ -408,19 +456,21 @@ parameter_types! {
     pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
     pub OffchainRepeat: BlockNumber = 5;
     pub HistoryDepth: u32 = 84;
-    pub const MaxNominators: u32 = 64;
 }
 
 pallet_staking_reward_curve::build! {
-    const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-        min_inflation: 0_025_000,
-        max_inflation: 0_100_000,
-        ideal_stake: 0_500_000,
-        falloff: 0_050_000,
-        max_piece_count: 40,
-        test_precision: 0_005_000,
-    );
+	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+		min_inflation: 0_025_000,
+		max_inflation: 0_100_000,
+		ideal_stake: 0_500_000,
+		falloff: 0_050_000,
+		max_piece_count: 40,
+		test_precision: 0_005_000,
+	);
 }
+
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
 pub struct StakingBenchmarkingConfig;
 impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
@@ -450,7 +500,6 @@ impl pallet_staking::Config for Runtime {
 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
 	type NextNewSession = Session;
     type MaxExposurePageSize = MaxExposurePageSize;
-	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
@@ -479,6 +528,12 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_offences::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
+	type OnOffenceHandler = Staking;
+}
+
 impl pallet_authority_discovery::Config for Runtime {
 	type MaxAuthorities = MaxAuthorities;
 }
@@ -495,16 +550,16 @@ frame_support::construct_runtime!(
 		Sudo: pallet_sudo,
 		// Authorship must be before session in order to note author in the correct session and era
 		// for im-online and staking.
-		Authorship: pallet_authorship,
-		Utility: pallet_utility,
-		Offences: pallet_offences,
-		ImOnline: pallet_im_online,
-		AuthorityDiscovery: pallet_authority_discovery,
+		Authorship: pallet_authorship, //done
+		Utility: pallet_utility, //done
+		Offences: pallet_offences, //done
+		ImOnline: pallet_im_online, // done
+		AuthorityDiscovery: pallet_authority_discovery, //done
 		// staking related pallets
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
-  		Staking: pallet_staking,
+  		Staking: pallet_staking, //done
   		Session: pallet_session, //done
-  		VoterList: pallet_bags_list::<Instance1>,
+  		VoterList: pallet_bags_list::<Instance1>, // done
   		Historical: pallet_session::historical::{Pallet}, // done
 		// EVM
 		Ethereum: pallet_ethereum,
