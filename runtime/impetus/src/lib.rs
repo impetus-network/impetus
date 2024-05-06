@@ -28,6 +28,7 @@ use sp_runtime::{
 	ApplyExtrinsicResult, ConsensusEngineId, ExtrinsicInclusionMode, OpaqueExtrinsic, Perbill,
 	Permill,
 };
+use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_std::{marker::PhantomData, prelude::*};
 use sp_version::RuntimeVersion;
 // Substrate FRAME
@@ -397,46 +398,47 @@ impl pallet_session::historical::Config for Runtime {
 }
 
 pub struct StakingBenchmarkingConfig;
-
 impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
-    type MaxNominators = ConstU32<1000>;
-    type MaxValidators = ConstU32<1000>;
+	type MaxNominators = ConstU32<1000>;
+	type MaxValidators = ConstU32<1000>;
 }
 
 impl pallet_staking::Config for Runtime {
-    type NominationsQuota = pallet_staking::FixedNominationsQuota<{ MaxNominations::get() }>;
-    type Currency = Balances;
-    type CurrencyBalance = Balance;
-    type UnixTime = Timestamp;
-    type CurrencyToVote = U128CurrencyToVote;
-    type RewardRemainder = Treasury;
-    type RuntimeEvent = RuntimeEvent;
-    type Slash = Treasury;
-    type Reward = (); // rewards are minted from the void
-    type SessionsPerEra = SessionsPerEra;
-    type BondingDuration = BondingDuration;
-    type SlashDeferDuration = SlashDeferDuration;
-    // A super-majority of the council can cancel the slash.
-    type AdminOrigin = EitherOfDiverse<
-        EnsureRoot<AccountId>,
-        pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
-    >;
-    type SessionInterface = Self;
-    type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
-    type NextNewSession = Session;
+	type Currency = Balances;
+	type CurrencyBalance = Balance;
+	type UnixTime = Timestamp;
+	type CurrencyToVote = U128CurrencyToVote;
+	type RewardRemainder = (); // TODO Treasury
+	type RuntimeEvent = RuntimeEvent;
+	type Slash = (); // TODO Treasury send the slashed funds to the treasury.
+	type Reward = (); // rewards are minted from the void
+	type SessionsPerEra = SessionsPerEra;
+	type BondingDuration = BondingDuration;
+	type SlashDeferDuration = SlashDeferDuration;
+	/// TODO A super-majority of the council can cancel the slash.
+	// type AdminOrigin = EitherOfDiverse<
+	// 	EnsureRoot<AccountId>,
+	// 	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
+	// >;
+	type AdminOrigin = EnsureRoot<AccountId>;
+	type SessionInterface = Self;
+	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+	type NextNewSession = Session;
     type MaxExposurePageSize = MaxExposurePageSize;
-    type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
-    type ElectionProvider = ElectionProviderMultiPhase;
-    type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
-    type VoterList = VoterList;
-    // This a placeholder, to be introduced in the next PR as an instance of bags-list
-    type TargetList = pallet_staking::UseValidatorsMap<Self>;
-    type MaxUnlockingChunks = ConstU32<32>;
-    type HistoryDepth = HistoryDepth;
-    type EventListeners = NominationPools;
-    type MaxControllersInDeprecationBatch = MaxControllersInDeprecationBatch;
-    type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
-    type BenchmarkingConfig = StakingBenchmarkingConfig;
+	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
+	type ElectionProvider = ElectionProviderMultiPhase;
+	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
+	type VoterList = VoterList;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
+	// This a placeholder, to be introduced in the next PR as an instance of bags-list
+	type TargetList = pallet_staking::UseValidatorsMap<Self>;
+	type MaxUnlockingChunks = ConstU32<32>;
+	type HistoryDepth = HistoryDepth;
+	type EventListeners = (); // NominationPools
+	type MaxControllersInDeprecationBatch = MaxControllersInDeprecationBatch;
+	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+	type BenchmarkingConfig = StakingBenchmarkingConfig;
 }
 
 // authorship
