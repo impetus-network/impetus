@@ -397,6 +397,31 @@ impl pallet_session::historical::Config for Runtime {
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
 }
 
+// staking
+parameter_types! {
+    pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+    pub const BondingDuration: sp_staking::EraIndex = (21 * DAYS) / (EPOCH_DURATION_IN_BLOCKS * SessionsPerEra::get());
+    pub const SlashDeferDuration: sp_staking::EraIndex = 1;
+    pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+    pub const MaxExposurePageSize: u32 = 256;
+    pub const MaxControllersInDeprecationBatch: u32 = 5900;
+    pub const OffendingValidatorsThreshold: Perbill = Perbill::from_percent(17);
+    pub OffchainRepeat: BlockNumber = 5;
+    pub HistoryDepth: u32 = 84;
+    pub const MaxNominators: u32 = 64;
+}
+
+pallet_staking_reward_curve::build! {
+    const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+        min_inflation: 0_025_000,
+        max_inflation: 0_100_000,
+        ideal_stake: 0_500_000,
+        falloff: 0_050_000,
+        max_piece_count: 40,
+        test_precision: 0_005_000,
+    );
+}
+
 pub struct StakingBenchmarkingConfig;
 impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
 	type MaxNominators = ConstU32<1000>;
