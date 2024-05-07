@@ -13,6 +13,7 @@ pub mod currency {
 	pub const GIGAWEI: Balance = 1_000_000_000;
 	pub const MICROIPT: Balance = 1_000_000_000_000;
 	pub const MILLIIPT: Balance = 1_000_000_000_000_000;
+	pub const CENT_IPT: Balance = 10_000_000_000_000_000;
 	pub const IPT: Balance = 1_000_000_000_000_000_000;
 	pub const KILOIPT: Balance = 1_000_000_000_000_000_000_000;
 
