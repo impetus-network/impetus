@@ -1114,7 +1114,7 @@ checksum = "b9b68e3193982cd54187d71afdb2a271ad4cf8af157858e9cb911b91321de143"
 dependencies = [
  "core2",
  "multibase",
- "multihash",
+ "multihash 0.17.0",
  "serde",
  "unsigned-varint",
 ]
@@ -3651,11 +3651,14 @@ dependencies = [
  "impetus-runtime",
  "jsonrpsee",
  "log",
+ "pallet-im-online",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "primitives",
+ "rand",
+ "sc-authority-discovery",
  "sc-basic-authorship",
  "sc-chain-spec",
  "sc-cli",
@@ -3676,6 +3679,7 @@ dependencies = [
  "sc-transaction-pool-api",
  "serde_json",
  "sp-api",
+ "sp-authority-discovery",
  "sp-block-builder",
  "sp-blockchain",
  "sp-consensus",
@@ -4204,7 +4208,7 @@ dependencies = [
  "libp2p-identity",
  "log",
  "multiaddr",
- "multihash",
+ "multihash 0.17.0",
  "multistream-select",
  "once_cell",
  "parking_lot 0.12.1",
@@ -4264,7 +4268,7 @@ dependencies = [
  "ed25519-dalek",
  "log",
  "multiaddr",
- "multihash",
+ "multihash 0.17.0",
  "quick-protobuf",
  "rand",
  "sha2 0.10.8",
@@ -5099,7 +5103,7 @@ dependencies = [
  "data-encoding",
  "log",
  "multibase",
- "multihash",
+ "multihash 0.17.0",
  "percent-encoding",
  "serde",
  "static_assertions",
@@ -5129,19 +5133,87 @@ dependencies = [
  "blake3",
  "core2",
  "digest 0.10.7",
- "multihash-derive",
+ "multihash-derive 0.8.0",
  "sha2 0.10.8",
  "sha3",
  "unsigned-varint",
 ]
 
 [[package]]
-name = "multihash-derive"
-version = "0.8.1"
+name = "multihash"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d6d4752e6230d8ef7adf7bd5d8c4b1f6561c1014c5ba9a37445ccefe18aa1db"
+checksum = "cfd8a792c1694c6da4f68db0a9d707c72bd260994da179e6030a5dcee00bb815"
 dependencies = [
- "proc-macro-crate 1.1.3",
+ "core2",
+ "digest 0.10.7",
+ "multihash-derive 0.8.0",
+ "sha2 0.10.8",
+ "unsigned-varint",
+]
+
+[[package]]
+name = "multihash"
+version = "0.19.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "076d548d76a0e2a0d4ab471d0b1c36c577786dfc4471242035d97a12a735c492"
+dependencies = [
+ "core2",
+ "unsigned-varint",
+]
+
+[[package]]
+name = "multihash-codetable"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6d815ecb3c8238d00647f8630ede7060a642c9f704761cd6082cb4028af6935"
+dependencies = [
+ "blake2b_simd",
+ "blake2s_simd",
+ "blake3",
+ "core2",
+ "digest 0.10.7",
+ "multihash-derive 0.9.0",
+ "ripemd",
+ "serde",
+ "sha1",
+ "sha2 0.10.8",
+ "sha3",
+ "strobe-rs",
+]
+
+[[package]]
+name = "multihash-derive"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc076939022111618a5026d3be019fd8b366e76314538ff9a1b59ffbcbf98bcd"
+dependencies = [
+ "proc-macro-crate 1.3.1",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+ "synstructure",
+]
+
+[[package]]
+name = "multihash-derive"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "890e72cb7396cb99ed98c1246a97b243cc16394470d94e0bc8b0c2c11d84290e"
+dependencies = [
+ "core2",
+ "multihash 0.19.1",
+ "multihash-derive-impl",
+]
+
+[[package]]
+name = "multihash-derive-impl"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d38685e08adb338659871ecfc6ee47ba9b22dcc8abcf6975d379cc49145c3040"
+dependencies = [
+ "proc-macro-crate 1.3.1",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -6612,12 +6684,12 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-crate"
-version = "1.1.3"
+version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e17d47ce914bf4de440332250b0edd23ce48c005f59fab39d3335866b114f11a"
+checksum = "7f4c021e1093a56626774e81216a4ce732a735e5bad4868a03f3ed65ca0c3919"
 dependencies = [
- "thiserror",
- "toml 0.5.11",
+ "once_cell",
+ "toml_edit 0.19.15",
 ]
 
 [[package]]
@@ -7431,6 +7503,35 @@ dependencies = [
  "log",
  "sp-core",
  "sp-wasm-interface 20.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.9.0)",
+ "thiserror",
+]
+
+[[package]]
+name = "sc-authority-discovery"
+version = "0.34.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot-v1.9.0#3c3d6fceb82372a3019b37117aa453d564b212de"
+dependencies = [
+ "async-trait",
+ "futures",
+ "futures-timer",
+ "ip_network",
+ "libp2p",
+ "log",
+ "multihash 0.18.1",
+ "multihash-codetable",
+ "parity-scale-codec",
+ "prost 0.12.4",
+ "prost-build",
+ "rand",
+ "sc-client-api",
+ "sc-network",
+ "sp-api",
+ "sp-authority-discovery",
+ "sp-blockchain",
+ "sp-core",
+ "sp-keystore",
+ "sp-runtime",
+ "substrate-prometheus-endpoint",
  "thiserror",
 ]
 
@@ -8484,7 +8585,7 @@ version = "2.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "18cf6c6447f813ef19eb450e985bcce6705f9ce7660db221b59093d15c79c4b7"
 dependencies = [
- "proc-macro-crate 1.1.3",
+ "proc-macro-crate 1.3.1",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -8710,6 +8811,17 @@ dependencies = [
  "cpufeatures",
  "digest 0.9.0",
  "opaque-debug 0.3.1",
+]
+
+[[package]]
+name = "sha1"
+version = "0.10.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest 0.10.7",
 ]
 
 [[package]]
@@ -9140,7 +9252,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -9202,7 +9314,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -9223,7 +9335,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -9424,7 +9536,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -9456,7 +9568,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "Inflector",
  "expander",
@@ -9549,7 +9661,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?branch=release-polkadot
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 
 [[package]]
 name = "sp-storage"
@@ -9567,7 +9679,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -9604,7 +9716,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "parity-scale-codec",
  "tracing",
@@ -9704,7 +9816,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#6e3059a873b78c7a4e2da18b4c298847713140ee"
+source = "git+https://github.com/paritytech/polkadot-sdk#930b0462d347d56d9d8751b1ca42b210ed6d9c51"
 dependencies = [
  "impl-trait-for-tuples",
  "log",
@@ -9934,6 +10046,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "strobe-rs"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fabb238a1cccccfa4c4fb703670c0d157e1256c1ba695abf1b93bd2bb14bab2d"
+dependencies = [
+ "bitflags 1.3.2",
+ "byteorder",
+ "keccak",
+ "subtle 2.5.0",
+ "zeroize",
 ]
 
 [[package]]
@@ -10371,6 +10496,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3550f4e9685620ac18a50ed434eb3aec30db8ba93b0287467bca5826ea25baf1"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "toml_edit"
+version = "0.19.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
+dependencies = [
+ "indexmap 2.2.6",
+ "toml_datetime",
+ "winnow 0.5.40",
 ]
 
 [[package]]

@@ -78,6 +78,9 @@ pub use primitives::{
 	Signature,
 };
 
+#[cfg(any(feature = "std", test))]
+pub use pallet_staking::StakerStatus;
+
 pub use constants::{currency::*, time::*};
 
 // A few exports that help ease life for downstream crates.
@@ -93,6 +96,8 @@ impl_opaque_keys! {
 	pub struct SessionKeys {
 		pub babe: Babe,
 		pub grandpa: Grandpa,
+		pub im_online: ImOnline,
+		pub authority_discovery: AuthorityDiscovery,
 	}
 }
 

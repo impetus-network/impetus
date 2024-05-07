@@ -8,18 +8,39 @@ use sp_consensus_grandpa::AuthorityId as GrandpaId;
 #[allow(unused_imports)]
 use sp_core::ecdsa;
 use sp_core::{Pair, Public, H160, U256};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::{
+	traits::{IdentifyAccount, Verify},
+	Perbill,
+};
 // Frontier
 use impetus_runtime::{
-	AccountId, Balance, RuntimeGenesisConfig, SS58Prefix, Signature, BABE_GENESIS_EPOCH_CONFIG,
-	WASM_BINARY,
+	constants::currency::*, AccountId, Balance, MaxNominations, RuntimeGenesisConfig, SS58Prefix,
+	SessionKeys, Signature, StakerStatus, BABE_GENESIS_EPOCH_CONFIG, WASM_BINARY,
 };
+
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
-
+const ENDOWMENT: Balance = 1_000_000 * IPT;
+const STASH: Balance = ENDOWMENT / 1000;
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
+
+fn session_keys(
+	grandpa: GrandpaId,
+	babe: BabeId,
+	im_online: ImOnlineId,
+	authority_discovery: AuthorityDiscoveryId,
+) -> SessionKeys {
+	SessionKeys {
+		grandpa,
+		babe,
+		im_online,
+		authority_discovery,
+	}
+}
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -42,8 +63,24 @@ where
 }
 
 /// Generate an Babe authority key.
-pub fn authority_keys_from_seed(s: &str) -> (BabeId, GrandpaId) {
-	(get_from_seed::<BabeId>(s), get_from_seed::<GrandpaId>(s))
+pub fn authority_keys_from_seed(
+	s: &str,
+) -> (
+	AccountId,
+	AccountId,
+	GrandpaId,
+	BabeId,
+	ImOnlineId,
+	AuthorityDiscoveryId,
+) {
+	(
+		get_account_id_from_seed::<ecdsa::Public>(&format!("{}//stash", s)),
+		get_account_id_from_seed::<ecdsa::Public>(s),
+		get_from_seed::<GrandpaId>(s),
+		get_from_seed::<BabeId>(s),
+		get_from_seed::<ImOnlineId>(s),
+		get_from_seed::<AuthorityDiscoveryId>(s),
+	)
 }
 
 fn properties() -> Properties {
@@ -53,7 +90,17 @@ fn properties() -> Properties {
 	properties
 }
 
-const UNITS: Balance = 1_000_000_000_000_000_000;
+fn development_config_genesis_json() -> serde_json::Value {
+	testnet_genesis(
+		AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+
+		vec![authority_keys_from_seed("Alith")],
+
+		vec![],
+		None,
+		42
+	)
+}
 
 pub fn development_config(enable_manual_seal: bool) -> ChainSpec {
 	ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
@@ -61,25 +108,22 @@ pub fn development_config(enable_manual_seal: bool) -> ChainSpec {
 		.with_id("dev")
 		.with_chain_type(ChainType::Development)
 		.with_properties(properties())
-		.with_genesis_config_patch(testnet_genesis(
-			// Sudo account (Alith)
-			AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
-			// Pre-funded accounts
-			vec![
-				AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")), // Alith
-				AccountId::from(hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")), // Baltathar
-				AccountId::from(hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")), // Charleth
-				AccountId::from(hex!("773539d4Ac0e786233D90A233654ccEE26a613D9")), // Dorothy
-				AccountId::from(hex!("Ff64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")), // Ethan
-				AccountId::from(hex!("C0F0f4ab324C46e55D02D0033343B4Be8A55532d")), // Faith
-			],
-			// Initial PoA authorities
-			vec![authority_keys_from_seed("Alice")],
-			// Ethereum chain ID
-			SS58Prefix::get() as u64,
-			enable_manual_seal,
-		))
+		.with_genesis_config_patch(development_config_genesis_json())
 		.build()
+}
+
+fn local_testnet_genesis() -> serde_json::Value {
+	testnet_genesis(
+		AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+		vec![
+			authority_keys_from_seed("Alith"),
+			authority_keys_from_seed("Baltathar"),
+			authority_keys_from_seed("Charleth"),
+		],
+		vec![],
+		None,
+		42,
+	)
 }
 
 pub fn local_testnet_config() -> ChainSpec {
@@ -88,36 +132,112 @@ pub fn local_testnet_config() -> ChainSpec {
 		.with_id("local_testnet")
 		.with_chain_type(ChainType::Local)
 		.with_properties(properties())
-		.with_genesis_config_patch(testnet_genesis(
-			// Sudo account (Alith)
-			AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
-			// Pre-funded accounts
-			vec![
-				AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")), // Alith
-				AccountId::from(hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")), // Baltathar
-				AccountId::from(hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")), // Charleth
-				AccountId::from(hex!("773539d4Ac0e786233D90A233654ccEE26a613D9")), // Dorothy
-				AccountId::from(hex!("Ff64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")), // Ethan
-				AccountId::from(hex!("C0F0f4ab324C46e55D02D0033343B4Be8A55532d")), // Faith
-			],
-			vec![
-				authority_keys_from_seed("Alice"),
-				authority_keys_from_seed("Bob"),
-			],
-			42,
-			false,
-		))
+		.with_genesis_config_patch(local_testnet_genesis())
 		.build()
+}
+
+fn configure_accounts(
+	initial_authorities: Vec<(
+		AccountId,
+		AccountId,
+		GrandpaId,
+		BabeId,
+		ImOnlineId,
+		AuthorityDiscoveryId,
+	)>,
+	initial_nominators: Vec<AccountId>,
+	endowed_accounts: Option<Vec<AccountId>>,
+	stash: Balance,
+) -> (
+	Vec<(
+		AccountId,
+		AccountId,
+		GrandpaId,
+		BabeId,
+		ImOnlineId,
+		AuthorityDiscoveryId,
+	)>,
+	Vec<AccountId>,
+	usize,
+	Vec<(AccountId, AccountId, Balance, StakerStatus<AccountId>)>,
+) {
+	let mut endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
+		vec![
+			AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")), // Alith
+			AccountId::from(hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")), // Baltathar
+			AccountId::from(hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")), // Charleth
+			AccountId::from(hex!("773539d4Ac0e786233D90A233654ccEE26a613D9")), // Dorothy
+			AccountId::from(hex!("Ff64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")), // Ethan
+			AccountId::from(hex!("C0F0f4ab324C46e55D02D0033343B4Be8A55532d")), // Faith
+		]
+	});
+	// endow all authorities and nominators.
+	initial_authorities
+		.iter()
+		.map(|x| &x.0)
+		.chain(initial_nominators.iter())
+		.for_each(|x| {
+			if !endowed_accounts.contains(x) {
+				endowed_accounts.push(x.clone())
+			}
+		});
+
+	// stakers: all validators and nominators.
+	let mut rng = rand::thread_rng();
+	let stakers = initial_authorities
+		.iter()
+		.map(|x| (x.0.clone(), x.0.clone(), stash, StakerStatus::Validator))
+		.chain(initial_nominators.iter().map(|x| {
+			use rand::{seq::SliceRandom, Rng};
+			let limit = (MaxNominations::get() as usize).min(initial_authorities.len());
+			let count = rng.gen::<usize>() % limit;
+			let nominations = initial_authorities
+				.as_slice()
+				.choose_multiple(&mut rng, count)
+				.into_iter()
+				.map(|choice| choice.0.clone())
+				.collect::<Vec<_>>();
+			(
+				x.clone(),
+				x.clone(),
+				stash,
+				StakerStatus::Nominator(nominations),
+			)
+		}))
+		.collect::<Vec<_>>();
+
+	let num_endowed_accounts = endowed_accounts.len();
+
+	(
+		initial_authorities,
+		endowed_accounts,
+		num_endowed_accounts,
+		stakers,
+	)
 }
 
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	sudo_key: AccountId,
-	endowed_accounts: Vec<AccountId>,
-	initial_authorities: Vec<(BabeId, GrandpaId)>,
+	initial_authorities: Vec<(
+		AccountId,
+		AccountId,
+		GrandpaId,
+		BabeId,
+		ImOnlineId,
+		AuthorityDiscoveryId,
+	)>,
+	initial_nominators: Vec<AccountId>,
+	endowed_accounts: Option<Vec<AccountId>>,
 	chain_id: u64,
-	enable_manual_seal: bool,
 ) -> serde_json::Value {
+	let (initial_authorities, endowed_accounts, num_endowed_accounts, stakers) = configure_accounts(
+		initial_authorities,
+		initial_nominators,
+		endowed_accounts,
+		STASH,
+	);
+
 	let evm_accounts = {
 		let mut map = BTreeMap::new();
 		map.insert(
@@ -168,16 +288,36 @@ fn testnet_genesis(
 			"balances": endowed_accounts
 				.iter()
 				.cloned()
-				.map(|k| (k, 1_000_000 * UNITS))
+				.map(|k| (k, 1_000_000 * IPT))
 				.collect::<Vec<_>>()
 		},
-		"babe": { 
-			"authorities": initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>(),
-			"epoch_config": BABE_GENESIS_EPOCH_CONFIG
+		"babe": {
+			"epochConfig": BABE_GENESIS_EPOCH_CONFIG
 		},
-		"grandpa": { "authorities": initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>() },
+		"session": {
+			"keys": initial_authorities
+				.iter()
+				.map(|x| (x.0, x.0, session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone())))
+				.collect::<Vec<_>>(),
+		},
+		"staking": {
+			"validatorCount": initial_authorities.len() as u32,
+			"minimumValidatorCount": initial_authorities.len() as u32,
+			"invulnerables": initial_authorities.iter().map(|x| x.0).collect::<Vec<_>>(),
+			"slashRewardFraction": Perbill::from_percent(10),
+			"stakers": stakers.clone(),
+			"minValidatorBond": 100 * IPT,
+			"minNominatorBond": 10 * IPT,
+		},
+		// "elections": {
+		// 	"members": endowed_accounts
+		// 		.iter()
+		// 		.take((num_endowed_accounts + 1) / 2)
+		// 		.cloned()
+		// 		.map(|member| (member, STASH))
+		// 		.collect::<Vec<_>>(),
+		// },
 		"evmChainId": { "chainId": chain_id },
 		"evm": { "accounts": evm_accounts },
-		"manualSeal": { "enable": enable_manual_seal }
 	})
 }
