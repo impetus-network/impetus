@@ -309,14 +309,14 @@ fn testnet_genesis(
 			"minValidatorBond": 100 * IPT,
 			"minNominatorBond": 10 * IPT,
 		},
-		// "elections": {
-		// 	"members": endowed_accounts
-		// 		.iter()
-		// 		.take((num_endowed_accounts + 1) / 2)
-		// 		.cloned()
-		// 		.map(|member| (member, STASH))
-		// 		.collect::<Vec<_>>(),
-		// },
+		"elections": {
+			"members": endowed_accounts
+				.iter()
+				.take((num_endowed_accounts + 1) / 2)
+				.cloned()
+				.map(|member| (member, STASH))
+				.collect::<Vec<_>>(),
+		},
 		"evmChainId": { "chainId": chain_id },
 		"evm": { "accounts": evm_accounts },
 	})
