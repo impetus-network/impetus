@@ -7,7 +7,7 @@ use futures::{channel::mpsc, prelude::*};
 use prometheus_endpoint::Registry;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
-use sc_consensus_babe::{BabeLink, SlotProportion};
+use sc_consensus_babe::{BabeLink, BabeWorkerHandle, SlotProportion};
 use sc_executor::NativeExecutionDispatch;
 use sc_network_sync::strategy::warp::{WarpSyncParams, WarpSyncProvider};
 use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
@@ -63,6 +63,7 @@ pub fn new_partial<RuntimeApi, Executor, BIQ>(
 			FrontierBackend,
 			Arc<fc_rpc::OverrideHandle<Block>>,
 			BabeLink<Block>,
+			BabeWorkerHandle<Block>,
 		),
 	>,
 	ServiceError,
@@ -81,7 +82,15 @@ where
 		GrandpaBlockImport<FullClient<RuntimeApi, Executor>>,
 		FullSelectChain,
 		OffchainTransactionPoolFactory<Block>,
-	) -> Result<(BasicImportQueue, BoxBlockImport, BabeLink<Block>), ServiceError>,
+	) -> Result<
+		(
+			BasicImportQueue,
+			BoxBlockImport,
+			BabeLink<Block>,
+			BabeWorkerHandle<Block>,
+		),
+		ServiceError,
+	>,
 {
 	let telemetry = config
 		.telemetry_endpoints
@@ -158,7 +167,7 @@ where
 		client.clone(),
 	);
 
-	let (import_queue, block_import, babe_link) = build_import_queue(
+	let (import_queue, block_import, babe_link, worker_handle) = build_import_queue(
 		client.clone(),
 		config,
 		eth_config,
@@ -184,6 +193,7 @@ where
 			frontier_backend,
 			overrides,
 			babe_link,
+			worker_handle
 		),
 	})
 }
@@ -197,8 +207,16 @@ pub fn build_babe_grandpa_import_queue<RuntimeApi, Executor>(
 	telemetry: Option<TelemetryHandle>,
 	grandpa_block_import: GrandpaBlockImport<FullClient<RuntimeApi, Executor>>,
 	select_chain: FullSelectChain,
-    offchain_tx_pool_factory: OffchainTransactionPoolFactory<Block>,
-) -> Result<(BasicImportQueue, BoxBlockImport, BabeLink<Block>), ServiceError>
+	offchain_tx_pool_factory: OffchainTransactionPoolFactory<Block>,
+) -> Result<
+	(
+		BasicImportQueue,
+		BoxBlockImport,
+		BabeLink<Block>,
+		BabeWorkerHandle<Block>,
+	),
+	ServiceError,
+>
 where
 	RuntimeApi: ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
 	RuntimeApi: Send + Sync + 'static,
@@ -225,7 +243,7 @@ where
 		Ok((slot, timestamp, dynamic_fee))
 	};
 
-	let (import_queue, _) =
+	let (import_queue, worker_handle) =
 		sc_consensus_babe::import_queue(sc_consensus_babe::ImportQueueParams {
 			link: babe_link.clone(),
 			block_import: block_import.clone(),
@@ -239,42 +257,13 @@ where
 			offchain_tx_pool_factory,
 		})
 		.map_err::<ServiceError, _>(Into::into)?;
-	Ok((import_queue, Box::new(block_import), babe_link))
+	Ok((
+		import_queue,
+		Box::new(block_import),
+		babe_link,
+		worker_handle,
+	))
 }
-
-/// Build the import queue for the template runtime (manual seal).
-// pub fn build_manual_seal_import_queue<RuntimeApi, Executor>(
-// 	client: Arc<FullClient<RuntimeApi, Executor>>,
-// 	config: &Configuration,
-// 	_eth_config: &EthConfiguration,
-// 	task_manager: &TaskManager,
-// 	_telemetry: Option<TelemetryHandle>,
-// 	grandpa_block_import: GrandpaBlockImport<FullClient<RuntimeApi, Executor>>,
-// 	_select_chain: FullSelectChain,
-// 	_transaction_pool: Arc<FullPool<FullClient<RuntimeApi, Executor>>>,
-// ) -> Result<(BasicImportQueue, BoxBlockImport, BabeLink<Block>), ServiceError>
-// where
-// 	RuntimeApi: ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
-// 	RuntimeApi: Send + Sync + 'static,
-// 	RuntimeApi::RuntimeApi: RuntimeApiCollection,
-// 	Executor: NativeExecutionDispatch + 'static,
-// {
-// 	let frontier_block_import = FrontierBlockImport::new(client.clone(), client);
-// 	let (block_import, babe_link) = sc_consensus_babe::block_import(
-// 		sc_consensus_babe::configuration(&*client)?,
-// 		grandpa_block_import,
-// 		client.clone(),
-// 	)?;
-// 	Ok((
-// 		sc_consensus_manual_seal::import_queue(
-// 			Box::new(frontier_block_import.clone()),
-// 			&task_manager.spawn_essential_handle(),
-// 			config.prometheus_registry(),
-// 		),
-// 		Box::new(frontier_block_import),
-// 		babe_link
-// 	))
-// }
 
 /// Builds a new service for a full client.
 pub async fn new_full<RuntimeApi, Executor>(
@@ -293,7 +282,7 @@ where
 	// } else {
 	// 	build_babe_grandpa_import_queue::<RuntimeApi, Executor>
 	// };
-    let build_import_queue = build_babe_grandpa_import_queue::<RuntimeApi, Executor>;
+	let build_import_queue = build_babe_grandpa_import_queue::<RuntimeApi, Executor>;
 
 	let PartialComponents {
 		client,
@@ -303,7 +292,16 @@ where
 		keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (mut telemetry, block_import, grandpa_link, frontier_backend, overrides, babe_link),
+		other:
+			(
+				mut telemetry,
+				block_import,
+				grandpa_link,
+				frontier_backend,
+				overrides,
+				babe_link,
+				worker_handle,
+			),
 	} = new_partial(&config, &eth_config, build_import_queue)?;
 
 	let FrontierPartialComponents {
@@ -393,6 +391,8 @@ where
 		let pool = transaction_pool.clone();
 		let network = network.clone();
 		let sync_service = sync_service.clone();
+        let keystore = keystore_container.keystore().clone();
+        let select_chain = select_chain.clone();
 
 		let is_authority = role.is_authority();
 		let enable_dev_signer = eth_config.enable_dev_signer;
@@ -425,7 +425,16 @@ where
 			Ok((slot, timestamp, dynamic_fee))
 		};
 
-		Box::new(move |deny_unsafe, subscription_task_executor| {
+		let pubsub_notification_sinks = pubsub_notification_sinks.clone();
+		let justification_stream = grandpa_link.justification_stream();
+		let shared_authority_set = grandpa_link.shared_authority_set().clone();
+		let finality_provider = sc_consensus_grandpa::FinalityProofProvider::new_for_service(
+			backend.clone(),
+			Some(shared_authority_set.clone()),
+		);
+
+		Box::new(move |deny_unsafe, subscription_task_executor: sc_rpc::SubscriptionTaskExecutor| {
+		let shared_voter_state = sc_consensus_grandpa::SharedVoterState::empty();
 			let eth_deps = crate::rpc::EthDeps {
 				client: client.clone(),
 				pool: pool.clone(),
@@ -449,9 +458,11 @@ where
 				forced_parent_hashes: None,
 				pending_create_inherent_data_providers,
 			};
+			
 			let deps = crate::rpc::FullDeps {
 				client: client.clone(),
 				pool: pool.clone(),
+				select_chain: select_chain.clone(),
 				deny_unsafe,
 				command_sink: if sealing.is_some() {
 					Some(command_sink.clone())
@@ -459,6 +470,17 @@ where
 					None
 				},
 				eth: eth_deps,
+				babe: crate::rpc::BabeDeps {
+                    keystore: keystore.clone(),
+                    babe_worker_handle: worker_handle.clone(),
+                },
+				grandpa: crate::rpc::GrandpaDeps {
+                    shared_voter_state,
+                    shared_authority_set: shared_authority_set.clone(),
+                    justification_stream: justification_stream.clone(),
+                    subscription_executor: subscription_task_executor.clone(),
+                    finality_provider: finality_provider.clone(),
+                },
 			};
 			crate::rpc::create_full(
 				deps,
@@ -527,7 +549,7 @@ where
 			telemetry.as_ref().map(|x| x.handle()),
 		);
 
-		let slot_duration =  babe_link.config().slot_duration();
+		let slot_duration = babe_link.config().slot_duration();
 
 		let target_gas_price = eth_config.target_gas_price;
 		let create_inherent_data_providers = move |_, ()| async move {
@@ -540,7 +562,7 @@ where
 			Ok((slot, timestamp, dynamic_fee))
 		};
 
-		let aura = sc_consensus_babe::start_babe(sc_consensus_babe::BabeParams {
+		let babe = sc_consensus_babe::start_babe(sc_consensus_babe::BabeParams {
 			client,
 			select_chain,
 			block_import,
@@ -560,7 +582,7 @@ where
 		// fails we take down the service with it.
 		task_manager
 			.spawn_essential_handle()
-			.spawn_blocking("aura", Some("block-authoring"), aura);
+			.spawn_blocking("babe-proposer", Some("block-authoring"), babe);
 	}
 
 	if enable_grandpa {

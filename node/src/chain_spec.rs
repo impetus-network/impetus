@@ -85,6 +85,7 @@ pub fn authority_keys_from_seed(
 
 fn properties() -> Properties {
 	let mut properties = Properties::new();
+	properties.insert("tokenSymbol".into(), "IPT".into());
 	properties.insert("tokenDecimals".into(), 18.into());
 	properties.insert("ss58Format".into(), SS58Prefix::get().into());
 	properties
@@ -102,7 +103,7 @@ fn development_config_genesis_json() -> serde_json::Value {
 	)
 }
 
-pub fn development_config(enable_manual_seal: bool) -> ChainSpec {
+pub fn development_config() -> ChainSpec {
 	ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
 		.with_name("Development")
 		.with_id("dev")
