@@ -2,7 +2,7 @@
 
 cargo build --release
 
-yarn start:debug
+yarn start:local
 
 settings
 
