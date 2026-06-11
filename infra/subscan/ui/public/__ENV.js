@@ -1,0 +1,1 @@
+window.__ENV = {"NEXT_PUBLIC_API_HOST":"http://localhost:4399"};

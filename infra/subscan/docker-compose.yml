@@ -1,0 +1,37 @@
+services:
+  subscan-api:
+    image: subscan/essentials:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment: &subscan-env
+      DB_DRIVER: postgres
+      POSTGRES_HOST: host.docker.internal
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASS: postgres
+      POSTGRES_DB: subscan
+      REDIS_HOST: host.docker.internal
+      REDIS_PORT: "6379"
+      CHAIN_WS_ENDPOINT: ${CHAIN_WS_ENDPOINT:-wss://archive-node-rpc.impetus.network}
+      ETH_RPC: ${ETH_RPC:-https://archive-node-rpc.impetus.network}
+      NETWORK_NODE: artemis
+      SUBSTRATE_ADDRESS_TYPE: "42"
+      SUBSTRATE_ACCURACY: "18"
+    ports:
+      - "${SUBSCAN_PORT:-4399}:4399"
+
+  subscan-observer:
+    image: subscan/essentials:latest
+    restart: unless-stopped
+    environment:
+      <<: *subscan-env
+    command: ["start", "subscribe"]
+
+  subscan-worker:
+    image: subscan/essentials:latest
+    restart: unless-stopped
+    environment:
+      <<: *subscan-env
+    command: ["start", "worker"]

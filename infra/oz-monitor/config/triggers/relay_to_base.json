@@ -1,0 +1,8 @@
+{
+  "name": "relay_to_base",
+  "trigger_type": "script",
+  "language": "bash",
+  "script_path": "./config/triggers/scripts/relay_to_base.sh",
+  "arguments": [],
+  "timeout_ms": 30000
+}

@@ -1,0 +1,131 @@
+[package]
+name = "runtime-common"
+version = "0.0.0"
+license = "Unlicense"
+description = "Shared types and helpers used by every Impetus/Impulse runtime."
+publish = false
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+scale-codec = { workspace = true }
+scale-info = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-version = { workspace = true }
+frame-support = { workspace = true, features = ["experimental"] }
+frame-system = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-transaction-payment = { workspace = true }
+pallet-aura = { workspace = true }
+pallet-authorship = { workspace = true }
+pallet-grandpa = { workspace = true }
+fp-account = { workspace = true, features = ["serde"] }
+fp-self-contained = { workspace = true, features = ["serde"] }
+cumulus-pallet-weight-reclaim = { workspace = true }
+pallet-base-fee = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-ethereum = { workspace = true }
+fp-rpc = { workspace = true }
+fp-evm = { workspace = true, features = ["serde"] }
+sp-api = { workspace = true }
+pallet-sudo = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-curve25519-benchmarking = { workspace = true }
+pallet-evm-precompile-sha3fips-benchmarking = { workspace = true }
+pallet-gasless-registry = { workspace = true }
+precompile-gasless-registry = { workspace = true }
+precompile-batch = { workspace = true }
+precompile-staking          = { workspace = true }
+precompile-session          = { workspace = true }
+precompile-nomination-pools = { workspace = true }
+precompile-fast-unstake     = { workspace = true }
+precompile-treasury         = { workspace = true }
+precompile-bags-list        = { workspace = true }
+precompile-staking-admin    = { workspace = true }
+environmental = { workspace = true }
+ethereum = { workspace = true }
+hex-literal = { workspace = true }
+sp-staking = { workspace = true }
+sp-npos-elections               = { workspace = true }
+pallet-staking = { workspace = true }
+pallet-staking-reward-curve = { workspace = true }
+frame-election-provider-support = { workspace = true }
+pallet-bags-list                = { workspace = true }
+pallet-session                  = { workspace = true }
+pallet-nomination-pools         = { workspace = true }
+pallet-fast-unstake             = { workspace = true }
+pallet-treasury                 = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+	"scale-codec/std",
+	"scale-info/std",
+	"sp-core/std",
+	"sp-runtime/std",
+	"sp-version/std",
+	"frame-support/std",
+	"frame-system/std",
+	"pallet-balances/std",
+	"pallet-transaction-payment/std",
+	"pallet-aura/std",
+	"pallet-authorship/std",
+	"pallet-grandpa/std",
+	"fp-account/std",
+	"fp-self-contained/std",
+	"cumulus-pallet-weight-reclaim/std",
+	"pallet-base-fee/std",
+	"pallet-evm/std",
+	"pallet-ethereum/std",
+	"fp-rpc/std",
+	"fp-evm/std",
+	"sp-api/std",
+	"pallet-sudo/std",
+	"pallet-evm-precompile-modexp/std",
+	"pallet-evm-precompile-bn128/std",
+	"pallet-evm-precompile-blake2/std",
+	"pallet-evm-precompile-sha3fips/std",
+	"pallet-evm-precompile-simple/std",
+	"pallet-evm-precompile-curve25519/std",
+	"pallet-evm-precompile-curve25519-benchmarking/std",
+	"pallet-evm-precompile-sha3fips-benchmarking/std",
+	"pallet-gasless-registry/std",
+	"precompile-gasless-registry/std",
+	"precompile-batch/std",
+	"precompile-staking/std",
+	"precompile-session/std",
+	"precompile-nomination-pools/std",
+	"precompile-fast-unstake/std",
+	"precompile-treasury/std",
+	"precompile-bags-list/std",
+	"precompile-staking-admin/std",
+	"environmental/std",
+	"ethereum/std",
+	"sp-staking/std",
+	"sp-npos-elections/std",
+	"pallet-staking/std",
+	"frame-election-provider-support/std",
+	"pallet-bags-list/std",
+	"pallet-session/std",
+	"pallet-nomination-pools/std",
+	"pallet-fast-unstake/std",
+	"pallet-treasury/std",
+]
+runtime-benchmarks = [
+	"pallet-evm/runtime-benchmarks",
+	"pallet-ethereum/runtime-benchmarks",
+	"pallet-sudo/runtime-benchmarks",
+	"pallet-gasless-registry/runtime-benchmarks",
+	"pallet-evm-precompile-curve25519-benchmarking/runtime-benchmarks",
+	"pallet-evm-precompile-sha3fips-benchmarking/runtime-benchmarks",
+]
+with-rocksdb-weights = []
+with-paritydb-weights = []
+runtime-test-fast = []

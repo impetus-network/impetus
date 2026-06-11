@@ -1,0 +1,56 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  oz-relayer:
+    image: openzeppelin/relayer:latest
+    restart: unless-stopped
+    volumes:
+      - ./oz-relayer/config:/app/config:ro
+      - ./oz-relayer/keys:/app/config/keys:ro
+    env_file:
+      - .env
+    environment:
+      - CONFIG_DIR=./config
+      - CONFIG_FILE_NAME=config.json
+      - REPOSITORY_STORAGE_TYPE=redis
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  oz-monitor:
+    build:
+      context: ./oz-monitor
+      dockerfile: Dockerfile
+    image: artemis/oz-monitor:local
+    restart: unless-stopped
+    volumes:
+      # Source templates — entrypoint renders these to /app/config at boot.
+      - ./oz-monitor/config:/app/config-template:ro
+      - monitor-data:/app/data
+    env_file:
+      - .env
+    environment:
+      - RELAYER_API_URL=http://oz-relayer:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      oz-relayer:
+        condition: service_started
+
+volumes:
+  redis-data:
+  monitor-data:

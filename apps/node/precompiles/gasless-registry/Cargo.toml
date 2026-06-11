@@ -1,0 +1,27 @@
+[package]
+name = "precompile-gasless-registry"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+fp-evm = { workspace = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+hex-literal = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-gasless-registry = { workspace = true }
+pallet-sudo = { workspace = true }
+sp-core = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+	"fp-evm/std",
+	"frame-support/std",
+	"frame-system/std",
+	"pallet-evm/std",
+	"pallet-gasless-registry/std",
+	"pallet-sudo/std",
+	"sp-core/std",
+]

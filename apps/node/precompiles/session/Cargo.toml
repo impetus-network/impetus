@@ -1,0 +1,41 @@
+[package]
+name = "precompile-session"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+fp-evm = { workspace = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-session = { workspace = true }
+precompile-utils = { workspace = true }
+precompile-utils-macro = { workspace = true }
+scale-codec = { workspace = true, features = ["derive"] }
+scale-info = { workspace = true, features = ["derive"] }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+
+[dev-dependencies]
+hex-literal = { workspace = true }
+pallet-balances = { workspace = true, features = ["std"] }
+pallet-timestamp = { workspace = true, features = ["std"] }
+precompile-utils = { workspace = true, features = ["testing"] }
+sp-io = { workspace = true, features = ["std"] }
+sp-staking = { workspace = true, features = ["std"] }
+
+[features]
+default = ["std"]
+std = [
+	"fp-evm/std",
+	"frame-support/std",
+	"frame-system/std",
+	"pallet-evm/std",
+	"pallet-session/std",
+	"precompile-utils/std",
+	"scale-codec/std",
+	"scale-info/std",
+	"sp-core/std",
+	"sp-runtime/std",
+]

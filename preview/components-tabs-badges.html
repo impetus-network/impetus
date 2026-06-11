@@ -1,0 +1,24 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>body{margin:0;padding:24px;background:var(--canvas);display:flex;flex-direction:column;gap:14px;}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.tab{font-family:var(--font-body);font-weight:500;font-size:14px;padding:8px 16px;border-radius:9999px;color:#6a6a6a;background:transparent;border:none;cursor:pointer;}
+.tab.active{background:#f5f0e0;color:#0a0a0a;}
+.pill{font-family:var(--font-body);font-weight:500;font-size:13px;padding:4px 12px;border-radius:9999px;background:#f5f0e0;color:#0a0a0a;}
+.pill.pink{background:#ff4d8b;color:#fff;}
+.pill.outline{background:transparent;border:1px solid #e5e5e5;}
+</style></head><body>
+<div class="row">
+  <button class="tab active">All</button>
+  <button class="tab">Outbound</button>
+  <button class="tab">CRM</button>
+  <button class="tab">AI agents</button>
+  <button class="tab">Integrations</button>
+</div>
+<div class="row">
+  <span class="pill">New</span>
+  <span class="pill pink">Featured</span>
+  <span class="pill outline">Beta</span>
+  <span class="pill">100+ providers</span>
+</div>
+</body></html>

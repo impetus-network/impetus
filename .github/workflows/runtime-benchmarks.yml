@@ -1,0 +1,89 @@
+name: Runtime benchmarks (impetus)
+
+# Runs the full NPoS pallet benchmark suite against the impetus runtime and
+# uploads the generated WeightInfo files as an artifact. Manual trigger by
+# default — full runs take ~3-5h. Also auto-runs on annotated `bench-*` tags
+# so a release engineer can pin a known-good weight bundle to a tag.
+#
+# The job intentionally does NOT auto-commit weights to the branch. The
+# generated files should be reviewed (smell-test extrinsic timings, diff
+# against the prior weight bundle) before being merged via a normal PR.
+on:
+  workflow_dispatch:
+    inputs:
+      pallets:
+        description: 'Space-separated pallet list (default: all NPoS pallets)'
+        required: false
+        default: ''
+      steps:
+        description: 'Benchmark steps (default 50, smoke runs use 2)'
+        required: false
+        default: '50'
+      repeat:
+        description: 'Benchmark repetitions (default 20, smoke runs use 1)'
+        required: false
+        default: '20'
+  push:
+    tags:
+      - 'bench-*'
+
+jobs:
+  benchmark:
+    # GitHub-hosted ubuntu-latest is NOT Substrate reference hardware. The
+    # generated numbers are good enough for CI smoke and for relative
+    # comparison between runs, but a mainnet weight bundle should be
+    # regenerated on a dedicated bare-metal Linux host before launch. Treat
+    # this workflow as the integration check, not the final source of truth.
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/node -> target
+          shared-key: bench-impetus
+
+      - name: Install protobuf compiler
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Build node with runtime-benchmarks feature
+        working-directory: apps/node
+        run: cargo build --release --features runtime-benchmarks --bin impetus-node
+
+      - name: Run benchmarks
+        working-directory: apps/node
+        env:
+          STEPS: ${{ github.event.inputs.steps || '50' }}
+          REPEAT: ${{ github.event.inputs.repeat || '20' }}
+        run: |
+          if [ -n "${{ github.event.inputs.pallets }}" ]; then
+            ./scripts/run-benchmarks.sh ${{ github.event.inputs.pallets }}
+          else
+            ./scripts/run-benchmarks.sh
+          fi
+
+      - name: Upload generated weights
+        uses: actions/upload-artifact@v4
+        with:
+          name: impetus-weights-${{ github.run_id }}
+          path: apps/node/runtimes/impetus/src/weights/pallet_*.rs
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Diff against committed weights
+        working-directory: apps/node
+        run: |
+          if git diff --quiet -- runtimes/impetus/src/weights/; then
+            echo "No weight changes."
+          else
+            echo "::warning::Weight files changed. Download the artifact, review, and open a PR."
+            git --no-pager diff --stat -- runtimes/impetus/src/weights/
+          fi

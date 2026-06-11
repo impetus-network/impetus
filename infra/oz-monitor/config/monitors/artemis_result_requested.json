@@ -1,0 +1,37 @@
+{
+  "name": "Artemis ResultRequested",
+  "paused": false,
+  "networks": ["artemis"],
+  "addresses": [
+    {
+      "address": "${CROSS_CHAIN_RECEIVER_ADDRESS}",
+      "contract_spec": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "roundId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ResultRequested",
+          "type": "event"
+        }
+      ]
+    }
+  ],
+  "match_conditions": {
+    "events": [
+      {
+        "signature": "ResultRequested(uint256)",
+        "expression": null
+      }
+    ],
+    "functions": [],
+    "transactions": []
+  },
+  "trigger_conditions": [],
+  "triggers": ["relay_to_base"]
+}

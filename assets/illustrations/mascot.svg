@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+  
+  <rect width="320" height="320" fill="#faf5e8"></rect>
+  
+  <ellipse cx="160" cy="220" rx="100" ry="70" fill="#ff4d8b"></ellipse>
+  
+  <circle cx="160" cy="140" r="80" fill="#ffb084"></circle>
+  
+  <circle cx="135" cy="135" r="8" fill="#0a0a0a"></circle>
+  <circle cx="185" cy="135" r="8" fill="#0a0a0a"></circle>
+  <circle cx="138" cy="132" r="2.5" fill="#fffaf0"></circle>
+  <circle cx="188" cy="132" r="2.5" fill="#fffaf0"></circle>
+  
+  <path d="M135 165 Q160 185 185 165" stroke="#0a0a0a" stroke-width="4" fill="none" stroke-linecap="round"></path>
+  
+  <circle cx="115" cy="155" r="10" fill="#ff6b5a" opacity="0.6"></circle>
+  <circle cx="205" cy="155" r="10" fill="#ff6b5a" opacity="0.6"></circle>
+  <text x="160" y="305" font-family="Inter" font-size="10" fill="#6a6a6a" text-anchor="middle" letter-spacing="1.5">PLACEHOLDER · MASCOT</text>
+</svg>

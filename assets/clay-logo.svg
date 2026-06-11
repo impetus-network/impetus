@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" width="200" height="64">
+  
+  <g>
+    <rect x="8" y="14" width="36" height="36" rx="10" fill="#0a0a0a"></rect>
+    <circle cx="20" cy="26" r="3" fill="#fffaf0"></circle>
+    <circle cx="32" cy="26" r="3" fill="#fffaf0"></circle>
+    <path d="M18 36 Q26 42 34 36" stroke="#fffaf0" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+  </g>
+  
+  <text x="56" y="42" font-family="Inter, sans-serif" font-weight="500" font-size="32" letter-spacing="-1.5" fill="#0a0a0a">Clay</text>
+</svg>

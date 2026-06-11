@@ -1,0 +1,22 @@
+# Rust build artifacts (129GB — must never enter build context)
+**/target
+# JS deps + build output
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+# VCS + local
+.git
+**/.DS_Store
+# Secrets / keys — never ship into an image
+**/launch-keys
+**/.env
+**/.env.*
+infra/oz-relayer/keys
+# Chain data + generated specs (operators supply their own)
+**/chain-specs/*.json
+# Misc local
+.claude
+.worktrees
+.playwright-mcp
+**/*.log

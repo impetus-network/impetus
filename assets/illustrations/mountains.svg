@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf5e8"></stop>
+      <stop offset="1" stop-color="#ffe4c4"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="320" fill="url(#sky)"></rect>
+  
+  <circle cx="370" cy="110" r="38" fill="#e8b94a"></circle>
+  
+  <path d="M0 240 L120 130 L220 200 L320 110 L480 230 L480 320 L0 320 Z" fill="#b8a4ed"></path>
+  
+  <path d="M0 280 L90 180 L200 250 L300 170 L420 260 L480 240 L480 320 L0 320 Z" fill="#ff6b5a"></path>
+  
+  <path d="M0 300 L80 230 L180 290 L280 220 L380 280 L480 260 L480 320 L0 320 Z" fill="#ffb084"></path>
+  
+  <path d="M115 135 L130 150 L120 160 L105 145 Z" fill="#fffaf0"></path>
+  <path d="M315 115 L335 135 L320 150 L300 130 Z" fill="#fffaf0"></path>
+  <text x="240" y="40" font-family="Inter" font-size="11" fill="#6a6a6a" text-anchor="middle" letter-spacing="1.5">PLACEHOLDER · 3D CLAYMATION ILLUSTRATION</text>
+</svg>

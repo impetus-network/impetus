@@ -1,0 +1,93 @@
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+scalar BigInt
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Meta {
+  status: JSON
+}
+
+type Query {
+  gaslessRules(id: String!): gaslessRules
+  gaslessRuless(where: gaslessRulesFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): gaslessRulesPage!
+  _meta: Meta
+}
+
+type gaslessRules {
+  id: String!
+  contract: String!
+  selector: String!
+  enabled: Boolean!
+  minValue: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+type gaslessRulesPage {
+  items: [gaslessRules!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input gaslessRulesFilter {
+  AND: [gaslessRulesFilter]
+  OR: [gaslessRulesFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  contract: String
+  contract_not: String
+  contract_in: [String]
+  contract_not_in: [String]
+  contract_contains: String
+  contract_not_contains: String
+  contract_starts_with: String
+  contract_ends_with: String
+  contract_not_starts_with: String
+  contract_not_ends_with: String
+  selector: String
+  selector_not: String
+  selector_in: [String]
+  selector_not_in: [String]
+  selector_contains: String
+  selector_not_contains: String
+  selector_starts_with: String
+  selector_ends_with: String
+  selector_not_starts_with: String
+  selector_not_ends_with: String
+  enabled: Boolean
+  enabled_not: Boolean
+  enabled_in: [Boolean]
+  enabled_not_in: [Boolean]
+  minValue: BigInt
+  minValue_not: BigInt
+  minValue_in: [BigInt]
+  minValue_not_in: [BigInt]
+  minValue_gt: BigInt
+  minValue_lt: BigInt
+  minValue_gte: BigInt
+  minValue_lte: BigInt
+  updatedAtBlock: BigInt
+  updatedAtBlock_not: BigInt
+  updatedAtBlock_in: [BigInt]
+  updatedAtBlock_not_in: [BigInt]
+  updatedAtBlock_gt: BigInt
+  updatedAtBlock_lt: BigInt
+  updatedAtBlock_gte: BigInt
+  updatedAtBlock_lte: BigInt
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@artemis/explorer",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3002",
+    "build": "next build",
+    "start": "next start",
+    "db:pull": "prisma db pull",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@artemis/coss-ui": "workspace:*",
+    "@artemis/shared": "workspace:*",
+    "@prisma/client": "^6.9.0",
+    "@tanstack/react-query": "^5.99.0",
+    "@trpc/client": "^11.7.0",
+    "@trpc/react-query": "^11.7.0",
+    "@trpc/server": "^11.7.0",
+    "date-fns": "^4.0.0",
+    "lucide-react": "^1.8.0",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
+    "viem": "^2.47.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "prisma": "^6.9.0",
+    "tailwindcss": "^4.2.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.2.0"
+  }
+}

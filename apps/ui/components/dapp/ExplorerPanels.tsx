@@ -1,0 +1,220 @@
+"use client";
+
+import { useMemo, useState, type ReactElement } from "react";
+import { formatEther } from "viem";
+import {
+  DappPanel,
+  Mono,
+  OverviewCard,
+  TransactionTypeBadge,
+} from "./DappPrimitives";
+import { shortHash } from "./mockData";
+import { useFetchBlocks } from "~/hooks/useFetchBlocks";
+import type { LiveFeedState, TxKind } from "./types";
+
+const filters: Array<TxKind | "all"> = [
+  "all",
+  "transfer",
+  "swap",
+  "mint",
+  "contract",
+];
+
+const searchHelperId = "explorer-search-helper";
+
+function classifyTx(to: string | null): TxKind {
+  if (!to) return "contract";
+  const last = parseInt(to.slice(-1), 16);
+  if (last < 2) return "swap";
+  if (last < 4) return "mint";
+  if (last < 6) return "contract";
+  return "transfer";
+}
+
+function timeAgo(timestamp: bigint): string {
+  const now = Math.floor(Date.now() / 1000);
+  const diff = now - Number(timestamp);
+  if (diff < 2) return "just now";
+  if (diff < 60) return `${diff}s ago`;
+  return `${Math.floor(diff / 60)}m ago`;
+}
+
+export function ExplorerPanels({
+  feed,
+}: {
+  feed: LiveFeedState;
+}): ReactElement {
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<TxKind | "all">("all");
+  const { blocks: realBlocks, transactions: realTxs } = useFetchBlocks(8);
+
+  const explorerTxs = useMemo(() => {
+    const mapped = realTxs.map((tx) => ({
+      hash: tx.hash,
+      from: tx.from as `0x${string}`,
+      to: (tx.to ?? tx.from) as `0x${string}`,
+      value: Number(formatEther(tx.value)).toFixed(3),
+      type: classifyTx(tx.to ?? null),
+      age: 0,
+    }));
+    if (filter === "all") return mapped;
+    return mapped.filter((tx) => tx.type === filter);
+  }, [realTxs, filter]);
+
+  return (
+    <div className="mt-10 space-y-6">
+      <div className="flex items-center gap-2 rounded-3xl bg-[#f5f0e0] p-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <span className="pl-4 text-lg text-[#6a6a6a]">⌕</span>
+          <label className="sr-only" htmlFor="explorer-search">
+            Search explorer
+          </label>
+          <input
+            aria-describedby={searchHelperId}
+            className="min-h-12 min-w-0 flex-1 bg-transparent font-mono text-sm text-[#0a0a0a] outline-none placeholder:text-[#6a6a6a]"
+            id="explorer-search"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by address, tx hash, block number, or .art name"
+            type="search"
+            value={search}
+          />
+        </div>
+        <button
+          aria-describedby={searchHelperId}
+          className="inline-flex min-h-12 items-center justify-center rounded-md bg-[#0a0a0a] px-6 text-sm font-semibold text-white transition hover:bg-[#1f1f1f]"
+          type="button"
+        >
+          Search
+        </button>
+      </div>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <OverviewCard
+          label="Latest block"
+          tone="lavender"
+          value={<Mono>#{feed.block.toLocaleString()}</Mono>}
+        />
+        <OverviewCard
+          label="TPS"
+          sub={feed.tps > 0 ? "↑ trending up" : "awaiting blocks"}
+          tone="ochre"
+          value={<Mono>{feed.tps.toLocaleString()}</Mono>}
+        />
+        <OverviewCard
+          label="Validators"
+          sub="100% online"
+          tone="peach"
+          value={<Mono>142</Mono>}
+        />
+        <OverviewCard
+          label="Avg gas paid"
+          sub="gasless network"
+          tone="cream"
+          value={<Mono>$0.00</Mono>}
+        />
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)]">
+        <DappPanel className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[#0a0a0a]/10 px-5 py-4">
+            <span className="text-base font-semibold">Latest blocks</span>
+            <span className="cursor-pointer text-xs text-[#6a6a6a]">
+              View all blocks →
+            </span>
+          </div>
+          <div className="divide-y divide-[#0a0a0a]/10">
+            {realBlocks.length === 0 && (
+              <p className="px-5 py-4 text-sm text-[#6a6a6a]">
+                Loading blocks...
+              </p>
+            )}
+            {realBlocks.map((block) => (
+              <article
+                className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3.5"
+                key={block.hash}
+              >
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f5f0e0] font-mono text-[11px] text-[#6a6a6a]">
+                  BLK
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold">
+                    <Mono>#{Number(block.number).toLocaleString()}</Mono>
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-[#6a6a6a]">
+                    by{" "}
+                    <Mono>
+                      {block.miner
+                        ? shortHash(block.miner)
+                        : "unknown"}
+                    </Mono>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[13px] font-medium">
+                    {block.transactions.length} txs
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-[#6a6a6a]">
+                    {timeAgo(block.timestamp)}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </DappPanel>
+
+        <DappPanel className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[#0a0a0a]/10 px-5 py-4">
+            <span className="text-base font-semibold">
+              Latest transactions
+            </span>
+            <span className="cursor-pointer text-xs text-[#6a6a6a]">
+              View all txs →
+            </span>
+          </div>
+          <div className="flex gap-1 border-b border-[#0a0a0a]/10 px-4 py-3">
+            {filters.map((item) => (
+              <button
+                className="rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition hover:bg-[#f5f0e0] data-[active=true]:bg-[#0a0a0a] data-[active=true]:text-white"
+                data-active={filter === item}
+                key={item}
+                onClick={() => setFilter(item)}
+                type="button"
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <div className="divide-y divide-[#0a0a0a]/10">
+            {explorerTxs.length === 0 && (
+              <p className="px-5 py-4 text-sm text-[#6a6a6a]">
+                No transactions yet...
+              </p>
+            )}
+            {explorerTxs.slice(0, 8).map((tx) => (
+              <article
+                className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3"
+                key={tx.hash}
+              >
+                <TransactionTypeBadge type={tx.type} />
+                <div className="min-w-0">
+                  <p className="truncate text-[13px]">
+                    <Mono>{shortHash(tx.hash)}</Mono>
+                  </p>
+                  <p className="mt-0.5 truncate text-[11px] text-[#6a6a6a]">
+                    <Mono>{shortHash(tx.from)}</Mono> →{" "}
+                    <Mono>{shortHash(tx.to)}</Mono>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[13px] font-semibold">
+                    <Mono>{tx.value}</Mono> ART
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </DappPanel>
+      </div>
+    </div>
+  );
+}

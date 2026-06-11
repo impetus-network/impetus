@@ -1,0 +1,48 @@
+# Public RPC gateway for Impetus. Sits in front of the internal pruned RPC node
+# and only lets browser callers from *.impetus.network through.
+#
+# Railway terminates TLS at its edge and forwards plain HTTP to $PORT, so we
+# disable Caddy's own auto-HTTPS.
+#
+# CAVEAT: Origin/Referer are browser-set headers. Non-browser clients (curl,
+# servers, bots) can forge them — this is browser-origin enforcement plus a
+# per-IP rate limit, NOT a hard authentication boundary. For that, add API keys
+# or a WAF (e.g. Cloudflare) in front.
+
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	log {
+		output stdout
+		format console
+	}
+
+	# Health endpoint for Railway — always 200, no origin check.
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	handle {
+		# Block unless Origin OR Referer is on *.impetus.network (apex or any sub).
+		@blocked {
+			not header_regexp Origin ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
+			not header_regexp Referer ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
+		}
+		respond @blocked "Forbidden: caller origin not allowed" 403
+
+		# Per-IP rate limit (caddy-ratelimit module).
+		rate_limit {
+			zone rpc {
+				key {remote_host}
+				events 120
+				window 1m
+			}
+		}
+
+		# JSON-RPC (POST) and WebSocket upgrades both proxy transparently.
+		reverse_proxy {$UPSTREAM:rpc-singapore.railway.internal:9944}
+	}
+}

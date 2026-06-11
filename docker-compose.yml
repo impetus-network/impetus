@@ -1,0 +1,46 @@
+services:
+  alice:
+    build:
+      context: apps/node
+      dockerfile: Dockerfile
+    command:
+      - --chain=local
+      - --alice
+      - --rpc-port=9944
+      - --rpc-cors=all
+      - --rpc-external
+      - --rpc-methods=unsafe
+      - --validator
+      - --node-key=0000000000000000000000000000000000000000000000000000000000000001
+    ports:
+      - "9944:9944"
+      - "30333:30333"
+    volumes:
+      - alice-data:/data
+    restart: unless-stopped
+
+  bob:
+    build:
+      context: apps/node
+      dockerfile: Dockerfile
+    command:
+      - --chain=local
+      - --bob
+      - --rpc-port=9944
+      - --rpc-cors=all
+      - --rpc-external
+      - --rpc-methods=unsafe
+      - --validator
+      - --bootnodes=/dns/alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+    ports:
+      - "9945:9944"
+      - "30334:30333"
+    volumes:
+      - bob-data:/data
+    depends_on:
+      - alice
+    restart: unless-stopped
+
+volumes:
+  alice-data:
+  bob-data:

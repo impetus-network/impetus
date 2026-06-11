@@ -1,0 +1,8 @@
+{
+  "name": "relay_to_artemis",
+  "trigger_type": "script",
+  "language": "python",
+  "script_path": "./config/triggers/scripts/relay_to_artemis.py",
+  "arguments": [],
+  "timeout_ms": 60000
+}

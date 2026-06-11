@@ -1,0 +1,31 @@
+node_modules/
+target/
+artifacts/
+cache/
+.turbo/
+.env
+.env.local
+.infisical.json
+dist/
+typechain-types/
+test-results/
+playwright-report/
+.playwright-mcp/
+.worktrees/
+.claude/worktrees/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+# Relayer keystores — never commit. Use infra/oz-relayer/scripts/encrypt-keys.mjs
+# to regenerate from a private key + KEYSTORE_PASSPHRASE.
+infra/oz-relayer/keys/*.json
+
+# Launch key material — NEVER commit
+launch-keys/
+apps/node/launch-keys/
+apps/node/.tokenomics-spec.md
+
+# macOS + local agent state
+.DS_Store
+.claude/

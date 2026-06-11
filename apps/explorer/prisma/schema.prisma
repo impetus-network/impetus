@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model account_extrinsic_mapping {
+  id              BigInt  @id @default(autoincrement())
+  account_id      String? @unique(map: "idx_account_extrinsic_mapping_account_id_extrinsic") @db.VarChar(255)
+  extrinsic_table Json?   @db.Json
+}
+
+model balance_accounts {
+  id       BigInt   @id @default(autoincrement())
+  address  String?  @unique(map: "idx_balance_accounts_address") @db.VarChar(100)
+  nonce    BigInt?
+  balance  Decimal? @db.Decimal(65, 0)
+  locked   Decimal? @db.Decimal(65, 0)
+  reserved Decimal? @db.Decimal(65, 0)
+
+  @@index([balance], map: "idx_balance_accounts_balance")
+  @@index([balance, address], map: "idx_balance_accounts_balance_address")
+}
+
+model balance_transfers {
+  id              BigInt  @id
+  block_num       BigInt?
+  sender          String? @db.VarChar(255)
+  receiver        String? @db.VarChar(255)
+  amount          String?
+  block_timestamp BigInt?
+  symbol          String? @db.VarChar(255)
+  token_id        String? @db.VarChar(255)
+  extrinsic_index String? @db.VarChar(255)
+
+  @@index([extrinsic_index], map: "idx_balance_transfers_extrinsic_index")
+  @@index([sender, receiver], map: "idx_balance_transfers_query_function")
+}
+
+model chain_blocks {
+  id               BigInt   @id @default(autoincrement())
+  block_num        BigInt?  @unique(map: "idx_chain_blocks_block_num")
+  block_timestamp  BigInt?
+  hash             String?  @db.VarChar(100)
+  parent_hash      String?  @db.VarChar(100)
+  state_root       String?  @db.VarChar(100)
+  extrinsics_root  String?  @db.VarChar(100)
+  event_count      BigInt?
+  extrinsics_count BigInt?
+  spec_version     BigInt?
+  validator        String?
+  codec_error      Boolean?
+  finalized        Boolean?
+
+  @@index([hash], map: "idx_chain_blocks_hash")
+}
+
+model chain_blocks_1 {
+  id               BigInt   @id @default(autoincrement())
+  block_num        BigInt?  @unique(map: "idx_chain_blocks_1_block_num")
+  block_timestamp  BigInt?
+  hash             String?  @db.VarChar(100)
+  parent_hash      String?  @db.VarChar(100)
+  state_root       String?  @db.VarChar(100)
+  extrinsics_root  String?  @db.VarChar(100)
+  event_count      BigInt?
+  extrinsics_count BigInt?
+  spec_version     BigInt?
+  validator        String?
+  codec_error      Boolean?
+  finalized        Boolean?
+
+  @@index([hash], map: "idx_chain_blocks_1_hash")
+}
+
+model chain_events {
+  id               BigInt  @id
+  extrinsic_index  String? @db.VarChar(100)
+  block_num        BigInt?
+  extrinsic_idx    BigInt?
+  module_id        String? @db.VarChar(255)
+  event_id         String? @db.VarChar(255)
+  params           Json?   @db.Json
+  event_idx        BigInt?
+  phase            Int?    @db.SmallInt
+  params_raw_bytes Bytes?
+
+  @@index([block_num], map: "idx_chain_events_block_num")
+  @@index([extrinsic_index], map: "idx_chain_events_extrinsic_index")
+  @@index([module_id, event_id], map: "idx_chain_events_query_function")
+}
+
+model chain_events_1 {
+  id               BigInt  @id
+  extrinsic_index  String? @db.VarChar(100)
+  block_num        BigInt?
+  extrinsic_idx    BigInt?
+  module_id        String? @db.VarChar(255)
+  event_id         String? @db.VarChar(255)
+  params           Json?   @db.Json
+  event_idx        BigInt?
+  phase            Int?    @db.SmallInt
+  params_raw_bytes Bytes?
+
+  @@index([block_num], map: "idx_chain_events_1_block_num")
+  @@index([extrinsic_index], map: "idx_chain_events_1_extrinsic_index")
+  @@index([module_id, event_id], map: "idx_chain_events_1_query_function")
+}
+
+model chain_extrinsics {
+  id                   BigInt   @id
+  extrinsic_index      String?  @db.VarChar(255)
+  block_num            BigInt?
+  block_timestamp      BigInt?
+  call_module_function String?  @db.VarChar(255)
+  call_module          String?  @db.VarChar(255)
+  params               Json?    @db.Json
+  account_id           String?  @db.VarChar(255)
+  signature            String?
+  nonce                BigInt?
+  era                  String?
+  extrinsic_hash       String?
+  is_signed            Boolean?
+  success              Boolean?
+  fee                  Decimal? @db.Decimal(65, 0)
+  used_fee             Decimal? @db.Decimal(65, 0)
+  params_raw_bytes     Bytes?
+
+  @@index([account_id], map: "idx_chain_extrinsics_account_id")
+  @@index([block_num], map: "idx_chain_extrinsics_block_num")
+  @@index([extrinsic_hash], map: "idx_chain_extrinsics_extrinsic_hash")
+  @@index([extrinsic_index], map: "idx_chain_extrinsics_extrinsic_index")
+  @@index([is_signed], map: "idx_chain_extrinsics_is_signed")
+  @@index([call_module_function, call_module], map: "idx_chain_extrinsics_query_function")
+}
+
+model chain_extrinsics_1 {
+  id                   BigInt   @id
+  extrinsic_index      String?  @db.VarChar(255)
+  block_num            BigInt?
+  block_timestamp      BigInt?
+  call_module_function String?  @db.VarChar(255)
+  call_module          String?  @db.VarChar(255)
+  params               Json?    @db.Json
+  account_id           String?  @db.VarChar(255)
+  signature            String?
+  nonce                BigInt?
+  era                  String?
+  extrinsic_hash       String?
+  is_signed            Boolean?
+  success              Boolean?
+  fee                  Decimal? @db.Decimal(65, 0)
+  used_fee             Decimal? @db.Decimal(65, 0)
+  params_raw_bytes     Bytes?
+
+  @@index([account_id], map: "idx_chain_extrinsics_1_account_id")
+  @@index([block_num], map: "idx_chain_extrinsics_1_block_num")
+  @@index([extrinsic_hash], map: "idx_chain_extrinsics_1_extrinsic_hash")
+  @@index([extrinsic_index], map: "idx_chain_extrinsics_1_extrinsic_index")
+  @@index([is_signed], map: "idx_chain_extrinsics_1_is_signed")
+  @@index([call_module_function, call_module], map: "idx_chain_extrinsics_1_query_function")
+}
+
+model chain_logs {
+  id        BigInt   @id @default(autoincrement())
+  block_num BigInt?
+  log_index String?  @db.VarChar(100)
+  log_type  String?
+  data      Json?    @db.Json
+  finalized Boolean?
+}
+
+model chain_logs_1 {
+  id        BigInt   @id @default(autoincrement())
+  block_num BigInt?
+  log_index String?  @db.VarChar(100)
+  log_type  String?
+  data      Json?    @db.Json
+  finalized Boolean?
+}
+
+model evm_abi_mappings {
+  id       String  @id @db.VarChar(255)
+  abi_func Json?
+  abi_type String? @db.VarChar(100)
+}
+
+model evm_accounts {
+  address     String  @id @db.VarChar(70)
+  evm_account String? @db.VarChar(70)
+
+  @@index([evm_account], map: "idx_evm_accounts_evm_account")
+}
+
+/// No PK in Postgres; block_num has a UNIQUE index and is always non-null.
+/// Manually promoted to @id so Prisma Client can operate on this table.
+model evm_blocks {
+  block_num         BigInt   @id @map("block_num")
+  block_hash        String?  @db.VarChar(70)
+  parent_hash       String?  @db.VarChar(70)
+  sha3_uncles       String?  @db.VarChar(70)
+  author            String?  @db.VarChar(70)
+  miner             String?  @db.VarChar(70)
+  state_root        String?  @db.VarChar(70)
+  transactions_root String?  @db.VarChar(70)
+  receipts_root     String?  @db.VarChar(70)
+  gas_used          Decimal? @db.Decimal(65, 0)
+  gas_limit         Decimal? @db.Decimal(65, 0)
+  extra_data        String?  @db.VarChar(255)
+  logs_bloom        String?
+  timestamp         BigInt?
+  difficulty        Decimal? @db.Decimal(65, 0)
+  total_difficulty  Decimal? @db.Decimal(65, 0)
+  seal_fields       String?  @db.VarChar(255)
+  uncles            String?  @db.VarChar(255)
+  block_size        Decimal? @db.Decimal(65, 0)
+  transaction_count Int?
+  base_fee_per_gas  Decimal? @db.Decimal(65, 0)
+
+  @@index([block_hash], map: "idx_evm_blocks_block_hash")
+}
+
+model evm_contracts {
+  address               String   @id @db.VarChar(255)
+  abi                   Json?
+  source_code           String?
+  creation_code         String?
+  creation_bytecode     String?
+  method_identifiers    Json?
+  deployer              String?  @db.VarChar(100)
+  block_num             BigInt?
+  tx_hash               String?  @db.VarChar(70)
+  deploy_at             BigInt?
+  verify_status         String?  @db.VarChar(32)
+  verify_type           String?  @default("SingleFile") @db.VarChar(100)
+  contract_name         String?  @db.VarChar(255)
+  compiler_version      String?  @db.VarChar(100)
+  evm_version           String?  @db.VarChar(100)
+  external_libraries    Json?
+  optimize              Boolean?
+  optimization_runs     BigInt?
+  extrinsic_index       String?  @db.VarChar(255)
+  verify_time           BigInt?
+  transaction_count     BigInt?
+  precompile            BigInt?
+  compile_settings      Json?
+  eip_standard          String?  @db.VarChar(100)
+  proxy_implementation  String?  @db.VarChar(64)
+  constructor_arguments String?
+  deploy_code_hash      String   @default("") @db.VarChar(70)
+
+  @@index([deploy_code_hash], map: "idx_evm_contracts_deploy_code_hash")
+  @@index([transaction_count], map: "idx_evm_contracts_transaction_count")
+  @@index([transaction_count, address], map: "idx_evm_contracts_txn_count_address")
+  @@index([verify_status], map: "idx_evm_contracts_verify_status")
+}
+
+model evm_erc721_holders {
+  id          String  @id @db.VarChar(100)
+  contract    String? @db.VarChar(100)
+  holder      String? @db.VarChar(100)
+  token_id    String? @default("0") @db.VarChar(255)
+  metadata    Json?   @db.Json
+  storage_url String?
+
+  @@index([contract], map: "idx_evm_erc721_holders_contract")
+  @@index([contract, holder], map: "idx_evm_erc721_holders_contract_hold")
+  @@index([contract, token_id], map: "idx_evm_erc721_holders_contract_token_id")
+  @@index([holder], map: "idx_evm_erc721_holders_hold")
+}
+
+model evm_token_holders {
+  id       BigInt   @id @default(autoincrement())
+  contract String?  @db.VarChar(100)
+  holder   String?  @db.VarChar(100)
+  balance  Decimal? @default(0) @db.Decimal(65, 0)
+
+  @@unique([contract, holder], map: "idx_evm_token_holders_contract_hold")
+  @@index([balance, id], map: "idx_evm_token_holders_balance_id")
+  @@index([contract], map: "idx_evm_token_holders_contract")
+  @@index([holder], map: "idx_evm_token_holders_hold")
+}
+
+model evm_tokens {
+  contract       String   @id @db.VarChar(255)
+  name           String?  @db.VarChar(255)
+  symbol         String?  @db.VarChar(255)
+  decimals       BigInt?
+  total_supply   Decimal? @default(0) @db.Decimal(65, 0)
+  holders        BigInt?
+  transfer_count BigInt?
+  category       String?  @db.VarChar(70)
+  base_token_uri String?  @db.VarChar(255)
+
+  @@index([category], map: "idx_evm_tokens_category")
+  @@index([holders, contract], map: "idx_evm_tokens_holders_contract")
+}
+
+model evm_tokens_transfers {
+  id          BigInt   @id @default(autoincrement())
+  contract    String   @default("") @db.VarChar(100)
+  hash        String   @default("") @db.VarChar(100)
+  create_at   BigInt   @default(0)
+  sender      String   @default("0") @db.VarChar(70)
+  receiver    String   @default("0") @db.VarChar(70)
+  value       Decimal? @default(0) @db.Decimal(65, 0)
+  token_id    String?  @db.VarChar(255)
+  transfer_id BigInt?
+  batch_index BigInt?  @default(0)
+  category    Int?     @default(0)
+
+  @@unique([transfer_id, batch_index], map: "idx_evm_tokens_transfers_batch")
+  @@index([category], map: "idx_evm_tokens_transfers_category")
+  @@index([contract], map: "idx_evm_tokens_transfers_contract")
+  @@index([create_at], map: "idx_evm_tokens_transfers_create_at")
+  @@index([hash], map: "idx_evm_tokens_transfers_hash")
+  @@index([token_id], map: "idx_evm_tokens_transfers_token_id")
+  @@index([transfer_id], map: "idx_evm_tokens_transfers_transfer_id")
+}
+
+model evm_transaction_receipts {
+  id                BigInt  @id
+  topics            String?
+  address           String? @db.VarChar(70)
+  transaction_hash  String? @db.VarChar(70)
+  index             Int?
+  data              String?
+  method_hash       String? @db.VarChar(70)
+  block_timestamp   BigInt?
+  topic1            String? @db.VarChar(70)
+  topic2            String? @db.VarChar(70)
+  topic3            String? @db.VarChar(70)
+  block_num         BigInt?
+  transaction_index BigInt?
+
+  @@index([address], map: "idx_evm_transaction_receipts_address")
+  @@index([method_hash], map: "idx_evm_transaction_receipts_method_hash")
+}
+
+model evm_transactions {
+  hash                     String   @id @db.VarChar(255)
+  block_num                BigInt?
+  block_timestamp          BigInt?
+  from_address             String?  @db.VarChar(70)
+  to_address               String?  @db.VarChar(70)
+  input_data               String?
+  nonce                    BigInt?
+  gas_limit                Decimal? @default(0) @db.Decimal(40, 0)
+  gas_price                Decimal? @default(0) @db.Decimal(40, 0)
+  gas_used                 Decimal? @default(0) @db.Decimal(40, 0)
+  contract                 String?  @db.VarChar(100)
+  success                  Boolean?
+  r                        String?  @db.VarChar(100)
+  s                        String?  @db.VarChar(100)
+  v                        BigInt?
+  value                    Decimal? @default(0) @db.Decimal(40, 0)
+  extrinsic_index          String?  @db.VarChar(100)
+  effective_gas_price      Decimal? @default(0) @db.Decimal(40, 0)
+  max_priority_fee_per_gas Decimal? @default(-1) @db.Decimal(40, 0)
+  max_fee_per_gas          Decimal? @default(0) @db.Decimal(40, 0)
+  cumulative_gas_used      Decimal? @default(0) @db.Decimal(40, 0)
+  txn_type                 BigInt?
+  transaction_index        BigInt?
+  transaction_id           BigInt?  @unique(map: "idx_evm_transactions_transaction_id")
+
+  @@index([block_num], map: "idx_evm_transactions_block_num")
+  @@index([from_address], map: "idx_evm_transactions_sender")
+}
+
+model runtime_versions {
+  id           BigInt  @id @default(autoincrement())
+  name         String?
+  spec_version BigInt? @unique(map: "idx_runtime_versions_spec_version")
+  modules      String?
+  raw_data     String?
+  block_num    BigInt?
+
+  @@index([block_num], map: "idx_runtime_versions_block_num")
+}
+
+model sessions {
+  session_id BigInt @id
+  validators Json?  @db.Json
+}
+
+model system_extrinsic_errors {
+  id              BigInt  @id @default(autoincrement())
+  extrinsic_index String? @unique(map: "idx_system_extrinsic_errors_extrinsic_index") @db.VarChar(100)
+  module          String?
+  name            String?
+  doc             String?
+}

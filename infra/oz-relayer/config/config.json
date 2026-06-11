@@ -1,0 +1,74 @@
+{
+  "networks": [
+    {
+      "type": "evm",
+      "network": "artemis",
+      "chain_id": 322,
+      "required_confirmations": 1,
+      "symbol": "ART",
+      "rpc_urls": ["http://host.docker.internal:9944"],
+      "explorer_urls": [],
+      "average_blocktime_ms": 6000,
+      "is_testnet": true
+    },
+    {
+      "type": "evm",
+      "network": "base_sepolia",
+      "chain_id": 84532,
+      "required_confirmations": 3,
+      "symbol": "ETH",
+      "rpc_urls": ["https://sepolia.base.org"],
+      "explorer_urls": ["https://sepolia.basescan.org"],
+      "average_blocktime_ms": 2000,
+      "is_testnet": true,
+      "features": ["eip1559"]
+    }
+  ],
+  "relayers": [
+    {
+      "id": "base_signer",
+      "name": "Base Sepolia Cross-Chain Signer",
+      "network": "base_sepolia",
+      "signer_id": "base_signer_local",
+      "network_type": "evm",
+      "policies": {
+        "min_balance": 10000000000000000
+      }
+    },
+    {
+      "id": "artemis_signer",
+      "name": "Artemis Cross-Chain Signer",
+      "network": "artemis",
+      "signer_id": "artemis_signer_local",
+      "network_type": "evm",
+      "policies": {
+        "min_balance": 0
+      }
+    }
+  ],
+  "signers": [
+    {
+      "id": "base_signer_local",
+      "type": "local",
+      "config": {
+        "path": "config/keys/base-relayer.json",
+        "passphrase": {
+          "type": "env",
+          "value": "KEYSTORE_PASSPHRASE"
+        }
+      }
+    },
+    {
+      "id": "artemis_signer_local",
+      "type": "local",
+      "config": {
+        "path": "config/keys/artemis-relayer.json",
+        "passphrase": {
+          "type": "env",
+          "value": "KEYSTORE_PASSPHRASE"
+        }
+      }
+    }
+  ],
+  "notifications": []
+}
