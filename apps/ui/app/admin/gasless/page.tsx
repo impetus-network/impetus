@@ -24,7 +24,7 @@ export default function GaslessManagerPage() {
       <ClayHero
         eyebrow="Sudo controls"
         title="Gasless Manager"
-        description="Manage gasless transaction rules on Artemis chain."
+        description="Manage gasless transaction rules on Impetus chain."
       >
         {isConnected && (
           <ClayBadge variant={isAdmin ? "success" : "secondary"} className="w-fit">

@@ -13,10 +13,10 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2.5">
               <span className="flex size-7 items-center justify-center rounded-lg bg-[#0a0a0a] text-xs font-bold text-white">
-                A
+                I
               </span>
               <span className="text-lg font-semibold tracking-tight text-[#0a0a0a]">
-                Artemis
+                Impetus
               </span>
             </div>
             <p className="mt-3 max-w-60 text-sm text-[#6a6a6a]">
@@ -41,9 +41,9 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-[#e5e5e5] pt-5 text-xs text-[#6a6a6a] sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 Artemis Labs · chainId 322</span>
+          <span>© 2026 Impetus Labs · chainId 388266</span>
           <span className="font-mono">
-            RPC: rpc.artemis.io · WS: wss.artemis.io
+            RPC: rpc-proxy-production-a44c.up.railway.app
           </span>
         </div>
       </div>

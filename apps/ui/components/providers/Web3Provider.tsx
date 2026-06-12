@@ -1,7 +1,7 @@
 "use client";
 
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { artemisTheme } from "~/config/rainbowTheme";
+import { impetusTheme } from "~/config/rainbowTheme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { WagmiProvider, cookieToInitialState } from "wagmi";
@@ -35,7 +35,7 @@ function Web3ProviderClient({ children, cookie }: Web3ProviderProps) {
   return (
     <WagmiProvider config={wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={artemisTheme}>
+        <RainbowKitProvider theme={impetusTheme}>
           <ToastProvider>
             <TxConfirmProvider>{children}</TxConfirmProvider>
           </ToastProvider>

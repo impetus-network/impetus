@@ -13,8 +13,8 @@ const interHeading = Inter({subsets:['latin'],variable:'--font-heading'});
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "Artemis Explorer",
-  description: "Block explorer and contract debugger for Artemis chain",
+  title: "Impetus Explorer",
+  description: "Block explorer and contract debugger for Impetus chain",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

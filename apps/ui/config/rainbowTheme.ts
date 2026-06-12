@@ -8,7 +8,7 @@ const base = lightTheme({
   overlayBlur: "small",
 });
 
-export const artemisTheme: Theme = {
+export const impetusTheme: Theme = {
   ...base,
   colors: {
     ...base.colors,

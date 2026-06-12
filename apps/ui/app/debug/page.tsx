@@ -10,7 +10,7 @@ export default function DebugContracts() {
       <ClayHero
         eyebrow="Developer console"
         title="Debug Contracts"
-        description="Interact with deployed contracts on Artemis chain."
+        description="Interact with deployed contracts on Impetus chain."
       />
 
       {debugContracts.length === 0 ? (

@@ -16,7 +16,7 @@ const txTypes: TxKind[] = [
 ];
 
 export const demoTokens: DemoToken[] = [
-  { sym: "ART", name: "Artemis", balance: 1248.42, usd: 1.84, color: "#ffb084" },
+  { sym: "IPT", name: "Impetus", balance: 1248.42, usd: 1.84, color: "#ffb084" },
   { sym: "USDC", name: "USD Coin", balance: 5430, usd: 1, color: "#2775ca" },
   { sym: "USDT", name: "Tether", balance: 200.5, usd: 1, color: "#26a17b" },
   { sym: "WETH", name: "Wrapped ETH", balance: 2.4831, usd: 3210, color: "#627eea" },

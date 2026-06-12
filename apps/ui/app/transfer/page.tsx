@@ -66,7 +66,7 @@ function getButtonLabel({
   if (!isEnsInput && !isAddress(to)) return "Invalid address";
   if (!Number.isFinite(amount) || amount <= 0) return "Enter amount";
   if (amount > balance) return "Insufficient balance";
-  return `Send ${amount.toFixed(4)} ART`;
+  return `Send ${amount.toFixed(4)} IPT`;
 }
 
 function SummaryRow({
@@ -171,7 +171,7 @@ export default function TransferPage(): ReactElement {
         });
         const gasPrice = await publicClient.getGasPrice();
         const fee = gas * gasPrice;
-        setGasEstimate(`${formatEther(fee)} ART`);
+        setGasEstimate(`${formatEther(fee)} IPT`);
       } catch {
         setGasEstimate(null);
       }
@@ -199,7 +199,7 @@ export default function TransferPage(): ReactElement {
         value: parseEther(amount),
       });
       if (hash) {
-        setSuccess({ amount: numericAmount, token: "ART", hash });
+        setSuccess({ amount: numericAmount, token: "IPT", hash });
         setAmount("");
         setTo("");
         refetchBalance();
@@ -223,11 +223,11 @@ export default function TransferPage(): ReactElement {
           <div className="mb-8">
             <p className="art-caption text-[#1a3a3a]">Transfer</p>
             <h2 className="art-display mt-3 text-5xl leading-none sm:text-6xl">
-              Send ART tokens.{" "}
+              Send IPT tokens.{" "}
               <span className="text-[#6a6a6a]">Instant finality.</span>
             </h2>
             <p className="mt-5 max-w-xl text-lg font-normal leading-7 text-[#3a3a3a]">
-              Transfer ART across the Artemis network with sub-second
+              Transfer IPT across the Impetus network with sub-second
               finality.
             </p>
           </div>
@@ -245,7 +245,7 @@ export default function TransferPage(): ReactElement {
                   <span className="truncate">
                     Balance{" "}
                     <Mono>
-                      {formatTokenAmount(artBalance)} ART
+                      {formatTokenAmount(artBalance)} IPT
                     </Mono>
                   </span>
                   <button
@@ -280,9 +280,9 @@ export default function TransferPage(): ReactElement {
                     className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-[#0a0a0a]/10 text-[9px] font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
                     style={{ backgroundColor: "#ffb084" }}
                   >
-                    AR
+                    IP
                   </span>
-                  <span className="text-sm font-semibold">ART</span>
+                  <span className="text-sm font-semibold">IPT</span>
                 </span>
               </div>
 
@@ -339,7 +339,7 @@ export default function TransferPage(): ReactElement {
               <SummaryRow label="Network">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-1.5 rounded-full bg-[#22c55e]" />
-                  Artemis (Chain ID 322)
+                  Impetus (Chain ID 388266)
                 </span>
               </SummaryRow>
               <SummaryRow label="Network fee">
@@ -351,7 +351,7 @@ export default function TransferPage(): ReactElement {
               <SummaryRow label="You send">
                 <Mono>
                   {validAmount ? formatTokenAmount(numericAmount) : "0.00"}{" "}
-                  ART
+                  IPT
                 </Mono>
               </SummaryRow>
             </div>
@@ -382,12 +382,12 @@ export default function TransferPage(): ReactElement {
 
         <aside className="flex min-w-0 flex-col gap-4">
           <div className="rounded-3xl bg-[#ffb084] p-6">
-            <p className="art-caption opacity-70">ART Balance</p>
+            <p className="art-caption opacity-70">IPT Balance</p>
             <h3 className="art-display mt-3 text-[2.75rem] leading-none tracking-tight">
               {formatTokenAmount(artBalance)}
             </h3>
             <p className="mt-2.5 text-sm font-semibold opacity-70">
-              Artemis Token
+              Impetus Token
             </p>
           </div>
 
@@ -396,15 +396,15 @@ export default function TransferPage(): ReactElement {
             <div className="mt-3.5 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-[13px] text-[#6a6a6a]">Token</span>
-                <span className="text-[13px] font-semibold">ART (18 decimals)</span>
+                <span className="text-[13px] font-semibold">IPT (18 decimals)</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[13px] text-[#6a6a6a]">Chain ID</span>
-                <Mono className="text-[13px]">322</Mono>
+                <Mono className="text-[13px]">388266</Mono>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[13px] text-[#6a6a6a]">Consensus</span>
-                <span className="text-[13px] font-semibold">Aura + GRANDPA</span>
+                <span className="text-[13px] font-semibold">BABE + GRANDPA</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[13px] text-[#6a6a6a]">Finality</span>

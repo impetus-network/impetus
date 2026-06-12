@@ -50,7 +50,7 @@ function StatStrip() {
 function ReceiptPreview() {
   const rows = [
     { label: "Send 50 USDC", value: "✓", highlight: false },
-    { label: "Network fee", value: "0.00 ART", highlight: true },
+    { label: "Network fee", value: "0.00 IPT", highlight: true },
     { label: "Wallet balance Δ", value: "−50.00 USDC", highlight: false },
   ];
   return (
@@ -85,7 +85,7 @@ function TerminalPreview() {
     <div className="rounded-md bg-[#0a1a1a] p-4 font-mono text-xs leading-relaxed text-white">
       <div>
         <span className="text-[#9a9a9a]">$ </span>
-        <span>forge create Token --rpc-url artemis</span>
+        <span>forge create Token --rpc-url impetus</span>
       </div>
       <div className="opacity-70">
         <span className="text-[#9a9a9a]">&gt; </span>
@@ -196,7 +196,7 @@ function DeveloperBand() {
             </h2>
             <p className="mt-5 max-w-md text-base leading-7 text-[#3a3a3a]">
               No new tooling, no new language, no porting headache. If it runs
-              on Ethereum, it runs on Artemis — at 100× the throughput, with no
+              on Ethereum, it runs on Impetus — at 100× the throughput, with no
               fee surface to manage.
             </p>
           </div>
@@ -217,7 +217,7 @@ function DeveloperBand() {
             <span className="size-2.5 rounded-full bg-[#e8b94a]" />
             <span className="size-2.5 rounded-full bg-[#a4d4c5]" />
             <span className="ml-auto font-mono text-[11px] text-[#9a9a9a]">
-              artemis.config.ts
+              impetus.config.ts
             </span>
           </div>
           <pre className="overflow-x-auto whitespace-pre font-mono text-sm leading-7 text-white">
@@ -231,22 +231,22 @@ function DeveloperBand() {
               <span className="text-[#a4d4c5]">export default</span>
               {" defineConfig({\n"}
               {"  chain: "}
-              <span className="text-[#ffb084]">&quot;artemis&quot;</span>
+              <span className="text-[#ffb084]">&quot;impetus&quot;</span>
               {",\n"}
               {"  rpcUrl: "}
               <span className="text-[#ffb084]">
-                &quot;https://rpc.artemis.io&quot;
+                &quot;https://rpc-proxy-production-a44c.up.railway.app&quot;
               </span>
               {",\n"}
               {"  chainId: "}
-              <span className="text-[#b8a4ed]">322</span>
+              <span className="text-[#b8a4ed]">388266</span>
               {",\n"}
               {"  gasless: "}
               <span className="text-[#b8a4ed]">true</span>
               {",\n});"}</code>
           </pre>
           <div className="mt-auto flex gap-3.5 border-t border-white/10 pt-4 font-mono text-[11px] text-[#9a9a9a]">
-            <span>chainId: 322</span>
+            <span>chainId: 388266</span>
             <span>·</span>
             <span>finality: 0.4s</span>
             <span>·</span>
@@ -278,7 +278,7 @@ export default function Home() {
             </h1>
 
             <p className="mt-7 max-w-xl text-lg font-normal leading-7 text-[#3a3a3a] sm:text-xl sm:leading-8">
-              Artemis is an EVM-compatible Layer 1 with zero gas fees. Deploy
+              Impetus is an EVM-compatible Layer 1 with zero gas fees. Deploy
               your existing contracts, transfer instantly, settle in seconds
               — without paying for every byte.
             </p>

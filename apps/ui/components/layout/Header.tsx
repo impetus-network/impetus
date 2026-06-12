@@ -31,10 +31,10 @@ export function Header() {
       <nav className="flex h-16 items-center gap-8 px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <span className="flex size-7 items-center justify-center rounded-lg bg-[#0a0a0a] text-xs font-bold text-white">
-            A
+            I
           </span>
           <span className="text-lg font-semibold tracking-tight text-[#0a0a0a]">
-            Artemis
+            Impetus
           </span>
           <span className="art-caption hidden rounded-sm bg-[#f5f0e0] px-2 py-0.5 text-[10px] text-[#6a6a6a] sm:inline-flex">
             Mainnet
