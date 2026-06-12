@@ -1,10 +1,10 @@
 import { defineChain } from "viem";
 
-export const artemis = defineChain({
-  id: 322644,
-  name: "Impulse",
-  nativeCurrency: { name: "Impulse Token", symbol: "IPL", decimals: 18 },
+export const impetus = defineChain({
+  id: 388266,
+  name: "Impetus",
+  nativeCurrency: { name: "Impetus Token", symbol: "IPT", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://rpc.impetus.network"] },
+    default: { http: ["https://rpc-proxy-production-a44c.up.railway.app"] },
   },
 });

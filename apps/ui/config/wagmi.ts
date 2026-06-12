@@ -2,7 +2,7 @@
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { cookieStorage, createStorage } from "wagmi";
-import { artemis } from "./chains";
+import { impetus } from "./chains";
 
 const WALLET_CONNECT_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ||
@@ -14,9 +14,9 @@ export const wagmiStorage = createStorage({
 
 export function createWagmiConfig() {
   return getDefaultConfig({
-    appName: "Artemis Explorer",
+    appName: "Impetus Explorer",
     projectId: WALLET_CONNECT_PROJECT_ID,
-    chains: [artemis],
+    chains: [impetus],
     ssr: true,
     storage: wagmiStorage,
   });

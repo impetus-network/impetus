@@ -1,7 +1,7 @@
 export const CHAIN_CONFIG = {
-  rpcUrl: "http://127.0.0.1:9944",
-  chainId: 322644, // Impulse
+  rpcUrl: "https://rpc-proxy-production-a44c.up.railway.app",
+  chainId: 388266, // Impetus mainnet
   blockTime: 6000, // 6 seconds in ms
-  tokenSymbol: "IPL",
+  tokenSymbol: "IPT",
   tokenDecimals: 18,
 } as const;

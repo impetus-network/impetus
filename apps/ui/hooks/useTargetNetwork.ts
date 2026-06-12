@@ -1,7 +1,7 @@
 "use client";
 
-import { artemis } from "~/config/chains";
+import { impetus } from "~/config/chains";
 
 export function useTargetNetwork() {
-  return { targetNetwork: artemis };
+  return { targetNetwork: impetus };
 }
