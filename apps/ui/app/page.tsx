@@ -10,9 +10,9 @@ import { cn } from "~/lib/utils";
 const compatibilityItems = ["MetaMask", "Hardhat", "Foundry", "Viem"];
 
 const stats = [
-  { label: "24h transactions", value: "14.2M", sub: "↑ 8.4% vs yesterday", accent: "text-[#22c55e]" },
-  { label: "Avg. block time", value: "0.4s", sub: "across 142 validators", accent: "text-[#6a6a6a]" },
-  { label: "Active addresses", value: "892K", sub: "↑ 3.1% w/w", accent: "text-[#22c55e]" },
+  { label: "Block time", value: "6s", sub: "BABE slot cadence", accent: "text-[#6a6a6a]" },
+  { label: "Finality", value: "~12s", sub: "GRANDPA, deterministic", accent: "text-[#6a6a6a]" },
+  { label: "Validators", value: "5", sub: "+ archive node", accent: "text-[#6a6a6a]" },
   { label: "Gas paid by users", value: "$0.00", sub: "Always.", accent: "text-[#ff4d8b] font-semibold" },
 ];
 
@@ -116,8 +116,8 @@ function FinalityChart() {
         ))}
       </div>
       <div className="flex justify-between font-mono text-[11px] text-[#0a0a0a]/70">
-        <span>p50: 0.40s</span>
-        <span>p99: 0.43s</span>
+        <span>block: ~6s</span>
+        <span>finality: ~12s</span>
       </div>
     </div>
   );
@@ -166,13 +166,13 @@ function FeatureGrid() {
           </article>
 
           <article className="flex min-h-96 flex-col gap-3.5 rounded-3xl bg-[#e8b94a] p-7 text-[#0a0a0a]">
-            <p className="art-caption text-[#0a0a0a]/60">Sub-second finality</p>
+            <p className="art-caption text-[#0a0a0a]/60">Deterministic finality</p>
             <h3 className="art-display text-[1.75rem] leading-[1.15]">
-              0.4s blocks. No reorgs.
+              6s blocks. GRANDPA finality.
             </h3>
             <p className="text-sm leading-relaxed text-[#0a0a0a]/85">
-              Deterministic finality with HotStuff-derived consensus. Your
-              transaction settles before the user closes the tab.
+              BABE block production with GRANDPA deterministic finality. Your
+              transaction settles in seconds, then never reverts.
             </p>
             <div className="mt-auto">
               <FinalityChart />
@@ -196,7 +196,7 @@ function DeveloperBand() {
             </h2>
             <p className="mt-5 max-w-md text-base leading-7 text-[#3a3a3a]">
               No new tooling, no new language, no porting headache. If it runs
-              on Ethereum, it runs on Impetus — at 100× the throughput, with no
+              on Ethereum, it runs on Impetus — bytecode-compatible, with no
               fee surface to manage.
             </p>
           </div>
@@ -248,7 +248,7 @@ function DeveloperBand() {
           <div className="mt-auto flex gap-3.5 border-t border-white/10 pt-4 font-mono text-[11px] text-[#9a9a9a]">
             <span>chainId: 388266</span>
             <span>·</span>
-            <span>finality: 0.4s</span>
+            <span>finality: ~12s</span>
             <span>·</span>
             <span>fee: 0</span>
           </div>

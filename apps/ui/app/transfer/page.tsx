@@ -224,11 +224,11 @@ export default function TransferPage(): ReactElement {
             <p className="art-caption text-[#1a3a3a]">Transfer</p>
             <h2 className="art-display mt-3 text-5xl leading-none sm:text-6xl">
               Send IPT tokens.{" "}
-              <span className="text-[#6a6a6a]">Instant finality.</span>
+              <span className="text-[#6a6a6a]">Deterministic finality.</span>
             </h2>
             <p className="mt-5 max-w-xl text-lg font-normal leading-7 text-[#3a3a3a]">
-              Transfer IPT across the Impetus network with sub-second
-              finality.
+              Transfer IPT across the Impetus network with deterministic
+              GRANDPA finality.
             </p>
           </div>
 
@@ -346,7 +346,7 @@ export default function TransferPage(): ReactElement {
                 <Mono>{gasEstimate ?? "--"}</Mono>
               </SummaryRow>
               <SummaryRow label="Estimated finality">
-                <Mono>~6s</Mono>
+                <Mono>~12s</Mono>
               </SummaryRow>
               <SummaryRow label="You send">
                 <Mono>
