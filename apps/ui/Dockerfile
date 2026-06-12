@@ -6,6 +6,7 @@ WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/ui/package.json ./apps/ui/
 COPY packages/shared/package.json ./packages/shared/
+COPY packages/coss-ui/package.json ./packages/coss-ui/
 
 RUN pnpm install --frozen-lockfile
 
@@ -20,8 +21,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/ui/node_modules ./apps/ui/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/coss-ui/node_modules ./packages/coss-ui/node_modules
 
 COPY packages/shared ./packages/shared
+COPY packages/coss-ui ./packages/coss-ui
 COPY apps/ui ./apps/ui
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 
