@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-impetus_squid}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+    # Internal only — reached by processor/graphql over the compose network as
+    # `db:5432`. Not exposed to the host (avoids port clashes on a busy box).
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  processor:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      RPC_ENDPOINT: ${RPC_ENDPOINT}
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-impetus_squid}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+    # Apply migrations, then run the processor.
+    command: sh -c "npx squid-typeorm-migration apply && node -r dotenv/config lib/main.js"
+
+  graphql:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-impetus_squid}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      GQL_PORT: "4350"
+    command: npx squid-graphql-server
+    ports:
+      - "${GQL_PORT:-4350}:4350"
+
+volumes:
+  pgdata:

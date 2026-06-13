@@ -1,0 +1,45 @@
+{
+  "outDir": "src/types",
+  "//": "specVersions points at the metadata history produced by `npm run metadata` (squid-substrate-metadata-explorer against RPC_ENDPOINT). Regenerate it whenever the runtime spec_version changes.",
+  "specVersions": "versions.jsonl",
+  "pallets": {
+    "Staking": {
+      "events": [
+        "Bonded",
+        "Unbonded",
+        "Withdrawn",
+        "ValidatorPrefsSet",
+        "Chilled",
+        "Kicked",
+        "PayoutStarted",
+        "Rewarded",
+        "Slashed",
+        "StakersElected",
+        "EraPaid"
+      ],
+      "calls": ["nominate"],
+      "storage": ["ErasValidatorReward", "Ledger", "Validators"]
+    },
+    "NominationPools": {
+      "events": [
+        "Created",
+        "Bonded",
+        "PaidOut",
+        "Unbonded",
+        "Withdrawn",
+        "StateChanged",
+        "MemberRemoved",
+        "PoolCommissionUpdated"
+      ]
+    },
+    "Session": {
+      "storage": ["Validators"]
+    },
+    "Balances": {
+      "events": ["Transfer"]
+    },
+    "GaslessRegistry": {
+      "events": ["RuleSet", "RuleRemoved"]
+    }
+  }
+}

@@ -1,5 +1,0 @@
-.env.local
-.ponder/
-generated/
-node_modules/
-dist/

@@ -1,3 +1,6 @@
 packages:
   - "apps/*"
   - "packages/*"
+  # Standalone Subsquid (Squid SDK) project — npm-managed, its own codegen.
+  # Excluded so pnpm/turbo do not try to install or build it.
+  - "!apps/substrate-indexer"

@@ -1,0 +1,86 @@
+# Squid schema (squid-typeorm-codegen dialect). `sqd codegen` generates
+# src/model/generated from this. Addresses are 0x-hex (AccountId20 = H160).
+
+type Validator @entity {
+  id: ID! # stash address (0x…)
+  commission: Int! # percent (0..100)
+  blocked: Boolean!
+  active: Boolean! # validator intent live (true on ValidatePrefsSet, false on Chilled)
+  elected: Boolean! # in the current era's elected set (from Session.Validators)
+  selfBonded: BigInt!
+  blocksProduced: Int! # blocks authored (from each block's author) — real activity metric
+  lastBlock: Int # height of the most recent block this validator authored
+  updatedAt: Int! # block height
+}
+
+type Nominator @entity {
+  id: ID! # stash address
+  targets: [String!]! # validator stash addresses
+  active: Boolean!
+  updatedAt: Int!
+}
+
+type Era @entity {
+  id: ID! # era index as string
+  index: Int!
+  validatorReward: BigInt
+  startBlock: Int!
+}
+
+type Payout @entity {
+  id: ID! # `${validator}-${era}`
+  validator: String! @index
+  era: Int!
+  block: Int!
+}
+
+type Pool @entity {
+  id: ID! # pool id
+  creator: String!
+  state: String! # Open | Blocked | Destroying
+  createdBlock: Int!
+  updatedAt: Int!
+}
+
+type PoolMember @entity {
+  id: ID! # member address
+  poolId: Int! @index
+  bonded: BigInt!
+  lastClaimBlock: Int
+  updatedAt: Int!
+}
+
+# Raw stake activity log (Bonded / Unbonded / Withdrawn / Rewarded / Slashed).
+type StakeEvent @entity {
+  id: ID!
+  account: String! @index
+  kind: String!
+  amount: BigInt!
+  block: Int!
+  timestamp: DateTime!
+}
+
+# Gasless registry rules (pallet-gasless-registry emits GaslessRegistry.RuleSet
+# / RuleRemoved substrate events — same data as the EVM logs Ponder used).
+type GaslessRule @entity {
+  id: ID! # `${contract}-${selector}`
+  contract: String! @index
+  selector: String!
+  enabled: Boolean!
+  minValue: BigInt!
+  updatedAtBlock: Int!
+}
+
+# Native (IPT) transfers. Captures EVERY value move — EOA->EOA, EOA->contract,
+# and contract->contract INTERNAL transfers — because Frontier routes all EVM
+# value through pallet_balances::Currency::transfer (one Balances.Transfer per
+# hop). No debug/trace stack required.
+type Transfer @entity {
+  id: ID!
+  from: String! @index
+  to: String! @index
+  amount: BigInt!
+  block: Int!
+  timestamp: DateTime!
+  extrinsicHash: String
+}

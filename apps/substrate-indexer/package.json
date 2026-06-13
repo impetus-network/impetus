@@ -1,0 +1,35 @@
+{
+  "name": "impetus-substrate-indexer",
+  "private": true,
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=20 <23"
+  },
+  "scripts": {
+    "metadata": "squid-substrate-metadata-explorer --rpc $RPC_ENDPOINT --out versions.jsonl",
+    "typegen": "squid-substrate-typegen typegen.json",
+    "codegen": "squid-typeorm-codegen",
+    "build": "tsc",
+    "migration:generate": "squid-typeorm-migration generate",
+    "migration:apply": "squid-typeorm-migration apply",
+    "processor": "node -r dotenv/config lib/main.js",
+    "serve": "squid-graphql-server"
+  },
+  "dependencies": {
+    "@subsquid/graphql-server": "^4.7.0",
+    "@subsquid/ss58": "^2.0.2",
+    "@subsquid/substrate-processor": "^8.6.0",
+    "@subsquid/typeorm-migration": "^1.3.0",
+    "@subsquid/typeorm-store": "^1.5.0",
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.0",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@subsquid/substrate-metadata-explorer": "^3.2.0",
+    "@subsquid/substrate-typegen": "^8.1.0",
+    "@subsquid/typeorm-codegen": "^2.2.0",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}
