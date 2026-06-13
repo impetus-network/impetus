@@ -38,6 +38,10 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASS: ${DB_PASS:-postgres}
       GQL_PORT: "4350"
+    # Serve the GraphQL API (NOT the processor entrypoint — without this it
+    # falls back to the Dockerfile CMD `node lib/main.js` and crash-loops on the
+    # missing RPC_ENDPOINT).
+    command: npx squid-graphql-server
     # On `default` (to reach db) AND `dokploy-network` so Dokploy's Traefik can
     # route the configured domain (indexer.impetus.network) to port 4350.
     # No host port binding — Traefik handles ingress.
