@@ -10,6 +10,8 @@ import { cn } from "~/lib/utils";
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/transfer", label: "Transfer" },
+  { href: "/staking", label: "Staking" },
+  { href: "/validator", label: "Validator" },
   { href: "/blockexplorer", label: "Explorer" },
 ];
 

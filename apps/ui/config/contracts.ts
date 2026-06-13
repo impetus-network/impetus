@@ -1,4 +1,11 @@
-import { GaslessRegistryAbi, GASLESS_REGISTRY_ADDRESS } from "@artemis/shared";
+import {
+  GaslessRegistryAbi,
+  GASLESS_REGISTRY_ADDRESS,
+  SessionAbi,
+  SESSION_PRECOMPILE_ADDRESS,
+  StakingAbi,
+  STAKING_PRECOMPILE_ADDRESS,
+} from "@artemis/shared";
 
 export interface ContractConfig {
   name: string;
@@ -11,5 +18,15 @@ export const debugContracts: ContractConfig[] = [
     name: "GaslessRegistry",
     address: GASLESS_REGISTRY_ADDRESS,
     abi: GaslessRegistryAbi,
+  },
+  {
+    name: "Staking",
+    address: STAKING_PRECOMPILE_ADDRESS,
+    abi: StakingAbi,
+  },
+  {
+    name: "Session",
+    address: SESSION_PRECOMPILE_ADDRESS,
+    abi: SessionAbi,
   },
 ];
