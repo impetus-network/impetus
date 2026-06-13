@@ -11,7 +11,9 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/transfer", label: "Transfer" },
   { href: "/staking", label: "Staking" },
-  { href: "/validator", label: "Validator" },
+  { href: "/pools", label: "Pools" },
+  { href: "/validators", label: "Validators" },
+  { href: "/validator", label: "Run a node" },
   { href: "/blockexplorer", label: "Explorer" },
 ];
 

@@ -1,6 +1,8 @@
 import {
   GaslessRegistryAbi,
   GASLESS_REGISTRY_ADDRESS,
+  NominationPoolsAbi,
+  NOMINATION_POOLS_PRECOMPILE_ADDRESS,
   SessionAbi,
   SESSION_PRECOMPILE_ADDRESS,
   StakingAbi,
@@ -28,5 +30,10 @@ export const debugContracts: ContractConfig[] = [
     name: "Session",
     address: SESSION_PRECOMPILE_ADDRESS,
     abi: SessionAbi,
+  },
+  {
+    name: "NominationPools",
+    address: NOMINATION_POOLS_PRECOMPILE_ADDRESS,
+    abi: NominationPoolsAbi,
   },
 ];

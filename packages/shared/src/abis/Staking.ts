@@ -176,6 +176,41 @@ export const StakingAbi = [
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],
   },
+  {
+    type: "function",
+    name: "historyDepth",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint32" }],
+  },
+  {
+    type: "function",
+    name: "erasValidatorReward",
+    stateMutability: "view",
+    inputs: [{ name: "era", type: "uint32" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "payoutStakers",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "validatorStash", type: "address" },
+      { name: "era", type: "uint32" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "payoutStakersByPage",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "validatorStash", type: "address" },
+      { name: "era", type: "uint32" },
+      { name: "page", type: "uint32" },
+    ],
+    outputs: [],
+  },
 ] as const;
 
 // RewardDestination.kind values (see IStaking.sol).

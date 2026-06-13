@@ -11,6 +11,7 @@ import { CodeBlock } from "~/components/validator/CodeBlock";
 import { ValidatorStatus } from "~/components/validator/ValidatorStatus";
 import { SetKeysForm } from "~/components/validator/SetKeysForm";
 import { ValidateForm } from "~/components/validator/ValidateForm";
+import { ValidatorManage } from "~/components/validator/ValidatorManage";
 import { RUN_NODE, ROTATE_KEYS, STEP_META } from "~/components/validator/content";
 
 function ConnectNote(): ReactElement {
@@ -171,6 +172,18 @@ export default function ValidatorPage(): ReactElement {
           </div>
         </div>
       </div>
+
+      {isConnected && (
+        <section className="mt-12 flex flex-col gap-4 border-t border-[#ece5d6] pt-8">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-black tracking-[-0.02em]">Already a validator?</h2>
+            <p className="max-w-2xl text-[14px] text-[#6a6a6a]">
+              Update your commission, stop validating, or rotate out your session keys.
+            </p>
+          </div>
+          <ValidatorManage />
+        </section>
+      )}
     </div>
   );
 }
