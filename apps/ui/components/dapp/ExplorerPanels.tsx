@@ -10,6 +10,7 @@ import {
 } from "./DappPrimitives";
 import { shortHash } from "./mockData";
 import { useFetchBlocks } from "~/hooks/useFetchBlocks";
+import { useScaffoldReadContract } from "~/hooks/useScaffoldReadContract";
 import type { LiveFeedState, TxKind } from "./types";
 
 const filters: Array<TxKind | "all"> = [
@@ -47,6 +48,10 @@ export function ExplorerPanels({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<TxKind | "all">("all");
   const { blocks: realBlocks, transactions: realTxs } = useFetchBlocks(8);
+  const { data: validatorCount } = useScaffoldReadContract({
+    contractName: "Staking",
+    functionName: "counterForValidators",
+  });
 
   const explorerTxs = useMemo(() => {
     const mapped = realTxs.map((tx) => ({
@@ -102,9 +107,13 @@ export function ExplorerPanels({
         />
         <OverviewCard
           label="Validators"
-          sub="100% online"
+          sub="active set"
           tone="peach"
-          value={<Mono>142</Mono>}
+          value={
+            <Mono>
+              {validatorCount !== undefined ? Number(validatorCount).toLocaleString() : "—"}
+            </Mono>
+          }
         />
         <OverviewCard
           label="Avg gas paid"

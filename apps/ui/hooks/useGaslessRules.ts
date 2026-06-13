@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { PONDER_URL } from "~/config/ponder";
+import { SQUID_URL } from "~/config/indexer";
 
 export interface GaslessRuleRow {
   id: string;
@@ -9,30 +9,29 @@ export interface GaslessRuleRow {
   selector: string;
   enabled: boolean;
   minValue: string;
-  updatedAtBlock: string;
+  updatedAtBlock: number;
 }
 
+// Subsquid OpenReader query shape (entity GaslessRule -> `gaslessRules`).
 const RULES_QUERY = `{
-  gaslessRuless(orderBy: "updatedAtBlock", orderDirection: "desc", limit: 100) {
-    items {
-      id
-      contract
-      selector
-      enabled
-      minValue
-      updatedAtBlock
-    }
+  gaslessRules(orderBy: [updatedAtBlock_DESC], limit: 100) {
+    id
+    contract
+    selector
+    enabled
+    minValue
+    updatedAtBlock
   }
 }`;
 
 async function fetchRules(): Promise<GaslessRuleRow[]> {
-  const res = await fetch(`${PONDER_URL}/graphql`, {
+  const res = await fetch(`${SQUID_URL}/graphql`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query: RULES_QUERY }),
   });
   const json = await res.json();
-  return json.data?.gaslessRuless?.items ?? [];
+  return json.data?.gaslessRules ?? [];
 }
 
 export function useGaslessRules() {
