@@ -6,8 +6,8 @@ services:
       POSTGRES_DB: ${DB_NAME:-impetus_squid}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASS:-postgres}
-    # Internal only — reached by processor/graphql over the compose network as
-    # `db:5432`. Not exposed to the host (avoids port clashes on a busy box).
+    # Internal only — reached by processor/graphql over the compose default
+    # network as `db:5432`. Not exposed to the host.
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -38,9 +38,16 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASS: ${DB_PASS:-postgres}
       GQL_PORT: "4350"
-    command: npx squid-graphql-server
-    ports:
-      - "${GQL_PORT:-4350}:4350"
+    # On `default` (to reach db) AND `dokploy-network` so Dokploy's Traefik can
+    # route the configured domain (indexer.impetus.network) to port 4350.
+    # No host port binding — Traefik handles ingress.
+    networks:
+      - default
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
 
 volumes:
   pgdata:
