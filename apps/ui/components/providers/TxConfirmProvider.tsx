@@ -86,7 +86,7 @@ export function TxConfirmProvider({ children }: { children: React.ReactNode }) {
                   <Row label="Contract" value={truncateAddr(details.to)} mono />
                 )}
                 {details.value !== undefined && details.value > 0n && (
-                  <Row label="Value" value={`${formatEther(details.value)} ART`} />
+                  <Row label="Value" value={`${formatEther(details.value)} IPT`} />
                 )}
                 {details.gasEstimate && (
                   <>

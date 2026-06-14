@@ -52,7 +52,7 @@ export function TransactionsTable({ transactions, loading }: TransactionsTablePr
                 {tx.to ? <Address address={tx.to} /> : <span className="text-muted-foreground">Contract Create</span>}
               </td>
               <td className="px-4 py-3 font-mono">
-                {Number(formatEther(tx.value)).toFixed(4)} ART
+                {Number(formatEther(tx.value)).toFixed(4)} IPT
               </td>
             </tr>
           ))}

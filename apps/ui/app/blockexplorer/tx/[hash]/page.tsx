@@ -44,7 +44,7 @@ export default function TxPage() {
           </div>
           <div>
             <dt className="text-sm text-muted-foreground">Value</dt>
-            <dd className="font-mono">{formatEther(tx.value)} ART</dd>
+            <dd className="font-mono">{formatEther(tx.value)} IPT</dd>
           </div>
           <div>
             <dt className="text-sm text-muted-foreground">Gas Used</dt>

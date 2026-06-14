@@ -76,7 +76,7 @@ export function useTransactor(): UseTransactorReturn {
         formatted: {
           gas: gas.toString(),
           gasPrice: `${formatGwei(gasPrice)} Gwei`,
-          totalCost: `${formatEther(totalCost)} ART`,
+          totalCost: `${formatEther(totalCost)} IPT`,
         },
       };
     } catch {

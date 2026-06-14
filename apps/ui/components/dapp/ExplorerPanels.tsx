@@ -79,7 +79,7 @@ export function ExplorerPanels({
             className="min-h-12 min-w-0 flex-1 bg-transparent font-mono text-sm text-[#0a0a0a] outline-none placeholder:text-[#6a6a6a]"
             id="explorer-search"
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by address, tx hash, block number, or .art name"
+            placeholder="Search by address, tx hash, block number"
             type="search"
             value={search}
           />
@@ -216,7 +216,7 @@ export function ExplorerPanels({
                 </div>
                 <div className="text-right">
                   <p className="text-[13px] font-semibold">
-                    <Mono>{tx.value}</Mono> ART
+                    <Mono>{tx.value}</Mono> IPT
                   </p>
                 </div>
               </article>

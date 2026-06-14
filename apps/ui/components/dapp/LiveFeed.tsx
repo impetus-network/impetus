@@ -150,14 +150,14 @@ export function NetworkFeedCard({
               style={{ backgroundColor: txDotColor[tx.type] ?? "#a4d4c5" }}
             />
             <Mono className="truncate">{shortHash(tx.hash)}</Mono>
-            <Mono className="text-white/70">{tx.value} ART</Mono>
+            <Mono className="text-white/70">{tx.value} IPT</Mono>
           </div>
         ))}
       </div>
 
       <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-3.5 text-xs text-[#a4d4c5]">
         <span>Gas fee</span>
-        <Mono className="font-medium">0.000 ART · gasless</Mono>
+        <Mono className="font-medium">0.000 IPT · gasless</Mono>
       </div>
     </section>
   );
