@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAccount } from "wagmi";
 import { Badge } from "@artemis/coss-ui/ui/badge";
 import { Button } from "@artemis/coss-ui/ui/button";
-import { ClayButton } from "@artemis/coss-ui/clay";
+import { ClayButton, ClayHero, ClayPage } from "@artemis/coss-ui/clay";
 import { cn } from "~/lib/utils";
 import { CodeBlock } from "~/components/validator/CodeBlock";
 import { ValidatorStatus } from "~/components/validator/ValidatorStatus";
@@ -75,16 +75,14 @@ export default function ValidatorPage(): ReactElement {
   const done = active - 1;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-2 py-2">
-      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#6a6a6a]">Run a node</p>
-      <h1 className="text-4xl font-black leading-none tracking-[-0.03em] sm:text-5xl">
-        Become a validator
-      </h1>
-      <p className="mt-1 max-w-xl text-[15px] text-[#6a6a6a]">
-        A guided setup — finish each step to join the active validator set and earn block rewards.
-      </p>
+    <ClayPage>
+      <ClayHero
+        eyebrow="Run a node"
+        title="Become a validator"
+        description="A guided setup — finish each step to join the active validator set and earn block rewards."
+      />
 
-      <div className="mt-6 rounded-[1.25rem] border border-[#e8b94a] bg-[#fdf6e3] p-5">
+      <div className="rounded-[1.25rem] border border-[#e8b94a] bg-[#fdf6e3] p-5">
         <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#7a5a12]">
           Before you start
         </p>
@@ -104,7 +102,7 @@ export default function ValidatorPage(): ReactElement {
         </ul>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_1fr]">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_1fr]">
         <nav className="rounded-[20px] border border-[#ece5d6] bg-white p-2 lg:sticky lg:top-6">
           {STEP_META.map((s) => {
             const state = s.n < active ? "done" : s.n === active ? "active" : "todo";
@@ -174,7 +172,7 @@ export default function ValidatorPage(): ReactElement {
       </div>
 
       {isConnected && (
-        <section className="mt-12 flex flex-col gap-4 border-t border-[#ece5d6] pt-8">
+        <section className="flex flex-col gap-4 border-t border-[#ece5d6] pt-8">
           <div className="flex flex-col gap-1">
             <h2 className="text-2xl font-black tracking-[-0.02em]">Already a validator?</h2>
             <p className="max-w-2xl text-[14px] text-[#6a6a6a]">
@@ -184,6 +182,6 @@ export default function ValidatorPage(): ReactElement {
           <ValidatorManage />
         </section>
       )}
-    </div>
+    </ClayPage>
   );
 }
