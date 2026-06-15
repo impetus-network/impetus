@@ -9,6 +9,7 @@ import {
   TransactionTypeBadge,
 } from "./DappPrimitives";
 import { shortHash } from "./mockData";
+import { HoldersPanel } from "./HoldersPanel";
 import { useFetchBlocks } from "~/hooks/useFetchBlocks";
 import { useScaffoldReadContract } from "~/hooks/useScaffoldReadContract";
 import type { LiveFeedState, TxKind } from "./types";
@@ -47,6 +48,7 @@ export function ExplorerPanels({
 }): ReactElement {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<TxKind | "all">("all");
+  const [view, setView] = useState<"activity" | "holders">("activity");
   const { blocks: realBlocks, transactions: realTxs } = useFetchBlocks(8);
   const { data: validatorCount } = useScaffoldReadContract({
     contractName: "Staking",
@@ -123,6 +125,23 @@ export function ExplorerPanels({
         />
       </section>
 
+      <div className="flex w-fit gap-1 rounded-full bg-[#f5f0e0] p-1">
+        {(["activity", "holders"] as const).map((item) => (
+          <button
+            className="rounded-full px-4 py-1.5 text-[12px] font-semibold capitalize transition data-[active=true]:bg-[#0a0a0a] data-[active=true]:text-white"
+            data-active={view === item}
+            key={item}
+            onClick={() => setView(item)}
+            type="button"
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+
+      {view === "holders" ? (
+        <HoldersPanel />
+      ) : (
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)]">
         <DappPanel className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-[#0a0a0a]/10 px-5 py-4">
@@ -224,6 +243,7 @@ export function ExplorerPanels({
           </div>
         </DappPanel>
       </div>
+      )}
     </div>
   );
 }
