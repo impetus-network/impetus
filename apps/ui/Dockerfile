@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Stage 1: Install dependencies
 FROM node:22-alpine AS deps
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -28,15 +30,18 @@ COPY packages/coss-ui ./packages/coss-ui
 COPY apps/ui ./apps/ui
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 
+# Non-sensitive identifiers stay as build args; the client secret is passed via
+# a BuildKit secret mount so it never lands in build logs, layers, or history.
 ARG INFISICAL_CLIENT_ID
-ARG INFISICAL_CLIENT_SECRET
 ARG INFISICAL_PROJECT_ID
+ARG INFISICAL_ENV=dev
 
 RUN pnpm --filter @artemis/shared build 2>/dev/null || true
-RUN infisical run \
-    --token "$(infisical login --method=universal-auth --client-id=${INFISICAL_CLIENT_ID} --client-secret=${INFISICAL_CLIENT_SECRET} --domain https://secret-manager.impetus.network/api --silent --plain)" \
+RUN --mount=type=secret,id=infisical_client_secret \
+    infisical run \
+    --token "$(infisical login --method=universal-auth --client-id=${INFISICAL_CLIENT_ID} --client-secret="$(cat /run/secrets/infisical_client_secret)" --domain https://secret-manager.impetus.network/api --silent --plain)" \
     --projectId ${INFISICAL_PROJECT_ID} \
-    --env dev \
+    --env ${INFISICAL_ENV} \
     --domain https://secret-manager.impetus.network/api \
     -- pnpm --filter @artemis/ui build
 
