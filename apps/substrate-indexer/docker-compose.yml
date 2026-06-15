@@ -41,7 +41,14 @@ services:
     # Serve the GraphQL API (NOT the processor entrypoint — without this it
     # falls back to the Dockerfile CMD `node lib/main.js` and crash-loops on the
     # missing RPC_ENDPOINT).
-    command: npx squid-graphql-server
+    #
+    # `--dumb-cache in-memory` gives Apollo a bounded InMemoryLRUCache (default
+    # 50mb) for the automatic-persisted-queries store. Without it the APQ cache
+    # is unbounded -> memory-exhaustion DoS (Apollo's "persisted queries are
+    # using an unbounded cache" warning). `--dumb-cache-max-age 0` keeps the
+    # cache bounded for APQ but disables response caching so indexer data stays
+    # fresh.
+    command: npx squid-graphql-server --dumb-cache in-memory --dumb-cache-max-age 0
     # On `default` (to reach db) AND `dokploy-network` so Dokploy's Traefik can
     # route the configured domain (indexer.impetus.network) to port 4350.
     # No host port binding — Traefik handles ingress.
