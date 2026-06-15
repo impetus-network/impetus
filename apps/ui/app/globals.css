@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* coss-ui is consumed as source via transpilePackages, so its files live
+   outside this app and Tailwind's automatic content detection misses them.
+   Without this the base ui primitives (Button, Input, Field, Badge, Table)
+   render unstyled because their utility classes are never generated. */
+@source "../../../packages/coss-ui/src";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
