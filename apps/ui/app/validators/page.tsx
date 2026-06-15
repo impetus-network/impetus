@@ -1,20 +1,19 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { ClayHero, ClayPage, ClaySection } from "@artemis/coss-ui/clay";
+import { ClaySection } from "@artemis/coss-ui/clay";
+import { PageShell } from "~/components/layout/PageShell";
 import { NetworkStats } from "~/components/validators/NetworkStats";
 import { ValidatorsTable } from "~/components/validators/ValidatorsTable";
 import { PayoutTool } from "~/components/validators/PayoutTool";
 
 export default function ValidatorsPage(): ReactElement {
   return (
-    <ClayPage>
-      <ClayHero
-        eyebrow="Network"
-        title="Validators"
-        description="The validators securing Impetus, the current network state, and era reward payouts."
-      />
-
+    <PageShell
+      eyebrow="Network"
+      title="Validators"
+      description="The validators securing Impetus, the current network state, and era reward payouts."
+    >
       <ClaySection title="Network" description="Live staking parameters from the chain.">
         <NetworkStats />
       </ClaySection>
@@ -32,6 +31,6 @@ export default function ValidatorsPage(): ReactElement {
       >
         <PayoutTool />
       </ClaySection>
-    </ClayPage>
+    </PageShell>
   );
 }

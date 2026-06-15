@@ -5,6 +5,7 @@ import { type ReactElement, useEffect, useRef, useState } from "react";
 import { formatEther, isAddress, parseEther } from "viem";
 import { useAccount, useBalance, usePublicClient } from "wagmi";
 import { DappPanel, Mono } from "~/components/dapp/DappPrimitives";
+import { PageShell } from "~/components/layout/PageShell";
 import { useTransactor } from "~/hooks/useTransactor";
 import { useEnsResolve } from "~/hooks/useEnsResolve";
 
@@ -217,21 +218,18 @@ export default function TransferPage(): ReactElement {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#fffaf0] px-4 py-10 text-[#0a0a0a] sm:px-8 sm:py-14">
-      <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <PageShell
+      eyebrow="Transfer"
+      title={
+        <>
+          Send IPT tokens.{" "}
+          <span className="text-[#6a6a6a]">Deterministic finality.</span>
+        </>
+      }
+      description="Transfer IPT across the Impetus network with deterministic GRANDPA finality."
+    >
+      <div className="grid w-full gap-6 lg:grid-cols-[1.4fr_1fr]">
         <section className="min-w-0">
-          <div className="mb-8">
-            <p className="art-caption text-[#1a3a3a]">Transfer</p>
-            <h2 className="art-display mt-3 text-5xl leading-none sm:text-6xl">
-              Send IPT tokens.{" "}
-              <span className="text-[#6a6a6a]">Deterministic finality.</span>
-            </h2>
-            <p className="mt-5 max-w-xl text-lg font-normal leading-7 text-[#3a3a3a]">
-              Transfer IPT across the Impetus network with deterministic
-              GRANDPA finality.
-            </p>
-          </div>
-
           <DappPanel className="p-4 sm:p-6">
             <div className="rounded-3xl bg-[#f5f0e0] p-4 sm:p-5">
               <div className="flex items-center justify-between gap-4">
@@ -414,6 +412,6 @@ export default function TransferPage(): ReactElement {
           </div>
         </aside>
       </div>
-    </main>
+    </PageShell>
   );
 }

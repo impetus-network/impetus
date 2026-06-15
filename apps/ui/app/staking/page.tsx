@@ -2,7 +2,8 @@
 
 import { type ReactElement } from "react";
 import { useAccount } from "wagmi";
-import { ClayBadge, ClayEmptyState, ClayHero, ClayPage, ClaySection } from "@artemis/coss-ui/clay";
+import { ClayBadge, ClayEmptyState, ClaySection } from "@artemis/coss-ui/clay";
+import { PageShell } from "~/components/layout/PageShell";
 import { useStakingStatus } from "~/hooks/useStakingStatus";
 import { StatStrip } from "~/components/staking/StatStrip";
 import { PositionPanel } from "~/components/staking/PositionPanel";
@@ -13,19 +14,18 @@ export default function StakingPage(): ReactElement {
   const status = useStakingStatus();
 
   return (
-    <ClayPage>
-      <ClayHero
-        eyebrow="Nominated proof-of-stake"
-        title="Staking console"
-        description="Bond IPT and nominate validators to help secure Impetus and earn staking rewards."
-      >
-        {isConnected && (
+    <PageShell
+      eyebrow="Nominated proof-of-stake"
+      title="Staking console"
+      description="Bond IPT and nominate validators to help secure Impetus and earn staking rewards."
+      actions={
+        isConnected && (
           <ClayBadge variant={status.isBonded ? "success" : "secondary"} className="w-fit">
             {status.isBonded ? "Bonded" : "Not bonded"}
           </ClayBadge>
-        )}
-      </ClayHero>
-
+        )
+      }
+    >
       {!isConnected ? (
         <ClaySection title="Get started" description="Connect a wallet to stake IPT.">
           <ClayEmptyState
@@ -44,6 +44,6 @@ export default function StakingPage(): ReactElement {
           </div>
         </div>
       )}
-    </ClayPage>
+    </PageShell>
   );
 }

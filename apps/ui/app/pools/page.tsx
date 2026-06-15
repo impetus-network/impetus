@@ -2,7 +2,8 @@
 
 import { type ReactElement } from "react";
 import { useAccount } from "wagmi";
-import { ClayEmptyState, ClayHero, ClayPage, ClaySection } from "@artemis/coss-ui/clay";
+import { ClayEmptyState, ClaySection } from "@artemis/coss-ui/clay";
+import { PageShell } from "~/components/layout/PageShell";
 import { PoolMemberPanel } from "~/components/pools/PoolMemberPanel";
 import { PoolsList } from "~/components/pools/PoolsList";
 import { JoinPoolForm } from "~/components/pools/JoinPoolForm";
@@ -12,13 +13,11 @@ export default function PoolsPage(): ReactElement {
   const { isConnected } = useAccount();
 
   return (
-    <ClayPage>
-      <ClayHero
-        eyebrow="Liquid staking"
-        title="Nomination pools"
-        description="Delegate any amount to a pool — below the nominator minimum — and the pool stakes and nominates on your behalf. Claim rewards any time."
-      />
-
+    <PageShell
+      eyebrow="Liquid staking"
+      title="Nomination pools"
+      description="Delegate any amount to a pool — below the nominator minimum — and the pool stakes and nominates on your behalf. Claim rewards any time."
+    >
       <ClaySection title="Your position" description="Your pool membership, rewards and unbonding.">
         {isConnected ? (
           <PoolMemberPanel />
@@ -44,6 +43,6 @@ export default function PoolsPage(): ReactElement {
           </ClaySection>
         </div>
       )}
-    </ClayPage>
+    </PageShell>
   );
 }

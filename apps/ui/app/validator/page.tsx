@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useAccount } from "wagmi";
 import { Badge } from "@artemis/coss-ui/ui/badge";
 import { Button } from "@artemis/coss-ui/ui/button";
-import { ClayButton, ClayHero, ClayPage } from "@artemis/coss-ui/clay";
+import { ClayButton } from "@artemis/coss-ui/clay";
+import { PageShell } from "~/components/layout/PageShell";
 import { cn } from "~/lib/utils";
 import { CodeBlock } from "~/components/validator/CodeBlock";
 import { ValidatorStatus } from "~/components/validator/ValidatorStatus";
@@ -75,13 +76,11 @@ export default function ValidatorPage(): ReactElement {
   const done = active - 1;
 
   return (
-    <ClayPage>
-      <ClayHero
-        eyebrow="Run a node"
-        title="Become a validator"
-        description="A guided setup — finish each step to join the active validator set and earn block rewards."
-      />
-
+    <PageShell
+      eyebrow="Run a node"
+      title="Become a validator"
+      description="A guided setup — finish each step to join the active validator set and earn block rewards."
+    >
       <div className="rounded-[1.25rem] border border-[#e8b94a] bg-[#fdf6e3] p-5">
         <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#7a5a12]">
           Before you start
@@ -182,6 +181,6 @@ export default function ValidatorPage(): ReactElement {
           <ValidatorManage />
         </section>
       )}
-    </ClayPage>
+    </PageShell>
   );
 }
