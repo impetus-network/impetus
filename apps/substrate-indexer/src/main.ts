@@ -1,4 +1,5 @@
 import { TypeormDatabase } from "@subsquid/typeorm-store";
+import { MoreThan } from "typeorm";
 import { processor, type Call } from "./processor";
 import {
   Validator,
@@ -10,6 +11,8 @@ import {
   StakeEvent,
   Transfer,
   GaslessRule,
+  Holder,
+  ChainStat,
 } from "./model";
 import * as m from "./mapping";
 
@@ -39,6 +42,9 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   const stakeEvents: StakeEvent[] = [];
   const transfers: Transfer[] = [];
   const gaslessRules = new Map<string, GaslessRule>();
+  // Native accounts whose balance changed this batch; their authoritative
+  // balance is read from System.Account storage after the block loop.
+  const touchedAccounts = new Set<string>();
 
   async function getValidator(id: string): Promise<Validator> {
     let v = validators.get(id) ?? (await ctx.store.get(Validator, id));
@@ -90,6 +96,10 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
     }
 
     for (const event of block.events) {
+      // Flag accounts touched by any balance event (Transfer/fees/rewards/etc.)
+      // so we re-read their authoritative balance from storage below.
+      for (const a of m.balanceTouchedAccounts(event)) touchedAccounts.add(a);
+
       switch (event.name) {
         case "Staking.ValidatorPrefsSet": {
           const r = m.decodeValidatorPrefsSet(event);
@@ -284,4 +294,54 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   await ctx.store.insert(stakeEvents);
   await ctx.store.insert(transfers);
   await ctx.store.upsert([...gaslessRules.values()]);
+
+  // ---- Native holders (Pattern 1) ------------------------------------------
+  // Read authoritative balances from System.Account storage at the batch head:
+  // a one-time full seed scan (so genesis accounts appear even when resuming at
+  // the chain head), then an incremental refresh of only the touched accounts.
+  if (ctx.blocks.length > 0) {
+    const head = ctx.blocks[ctx.blocks.length - 1].header;
+    const holders = new Map<string, Holder>();
+
+    const toHolder = (address: string, bal: m.AccountBalance): Holder =>
+      new Holder({
+        id: address,
+        free: bal.free,
+        reserved: bal.reserved,
+        total: bal.free + bal.reserved,
+        nonce: bal.nonce,
+        updatedAt: head.height,
+      });
+
+    let stat =
+      (await ctx.store.get(ChainStat, "singleton")) ??
+      new ChainStat({
+        id: "singleton",
+        totalIssuance: 0n,
+        holdersCount: 0,
+        seeded: false,
+        updatedAt: 0,
+      });
+
+    if (!stat.seeded) {
+      for await (const [address, bal] of m.scanAllAccounts(head)) {
+        holders.set(address, toHolder(address, bal));
+      }
+      stat.seeded = true;
+    }
+
+    if (touchedAccounts.size > 0) {
+      const balances = await m.readAccounts(head, [...touchedAccounts]);
+      for (const [address, bal] of balances) {
+        holders.set(address, toHolder(address, bal));
+      }
+    }
+
+    if (holders.size > 0) await ctx.store.upsert([...holders.values()]);
+
+    stat.totalIssuance = await m.readTotalIssuance(head);
+    stat.holdersCount = await ctx.store.countBy(Holder, { total: MoreThan(0n) });
+    stat.updatedAt = head.height;
+    await ctx.store.upsert(stat);
+  }
 });

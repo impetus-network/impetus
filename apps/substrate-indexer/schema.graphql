@@ -84,3 +84,28 @@ type Transfer @entity {
   timestamp: DateTime!
   extrinsicHash: String
 }
+
+# Native (IPT) holders. Balance is read AUTHORITATIVELY from System.Account
+# storage (free + reserved), never derived from Transfer deltas — genesis,
+# fees, rewards and slashing never all surface as Balances.Transfer events.
+# Pattern: balance events flag which accounts changed in a block, then the
+# processor reads System.Account for that set at the block (plus a one-time
+# full-storage seed scan so genesis-funded accounts appear immediately).
+type Holder @entity {
+  id: ID! # account address (0x…, AccountId20)
+  free: BigInt!
+  reserved: BigInt!
+  total: BigInt! @index # free + reserved — the value the holders ranking sorts on
+  nonce: Int!
+  updatedAt: Int! # block height of the last balance read
+}
+
+# Chain-wide singleton (id = "singleton"): supply + holder count for the
+# explorer header and per-holder percentage of supply.
+type ChainStat @entity {
+  id: ID!
+  totalIssuance: BigInt!
+  holdersCount: Int!
+  seeded: Boolean! # true once the full System.Account seed scan has run
+  updatedAt: Int!
+}

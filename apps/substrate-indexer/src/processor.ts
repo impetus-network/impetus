@@ -41,7 +41,23 @@ const POOL_EVENTS = [
 // Native transfers: Frontier routes every EVM value move (top-level AND
 // internal contract->contract) through pallet_balances, so a single
 // Balances.Transfer event captures them all — no trace needed.
-const BALANCES_EVENTS = ["Balances.Transfer"];
+//
+// The non-Transfer events are subscribed only to flag WHICH accounts changed
+// balance in a block (fees, rewards, slashing, reserves) so the holder index
+// can re-read System.Account for them — the authoritative amount comes from
+// storage, not from these event payloads.
+const BALANCES_EVENTS = [
+  "Balances.Transfer",
+  "Balances.Endowed",
+  "Balances.Deposit",
+  "Balances.Withdraw",
+  "Balances.Reserved",
+  "Balances.Unreserved",
+  "Balances.Slashed",
+  "Balances.BalanceSet",
+  "Balances.Minted",
+  "Balances.Burned",
+];
 
 // Gasless registry rules (substrate events from pallet-gasless-registry).
 const GASLESS_EVENTS = ["GaslessRegistry.RuleSet", "GaslessRegistry.RuleRemoved"];

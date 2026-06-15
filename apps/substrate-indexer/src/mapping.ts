@@ -17,7 +17,9 @@ import * as stakingCalls from "./types/staking/calls";
 import * as poolEvents from "./types/nomination-pools/events";
 import * as balancesEvents from "./types/balances/events";
 import * as gaslessEvents from "./types/gasless-registry/events";
-import type { Event, Call } from "./processor";
+import * as systemStorage from "./types/system/storage";
+import * as balancesStorage from "./types/balances/storage";
+import type { Event, Call, Block } from "./processor";
 
 // Pick the first runtime version whose `.is(item)` matches. Lets one handler
 // cover multiple runtime versions without branching at the call site.
@@ -162,4 +164,85 @@ export function decodeRuleSet(e: Event): {
 export function decodeRuleRemoved(e: Event): { contract: string; selector: string } {
   const { contract, selector } = pickEvent([gaslessEvents.ruleRemoved.v9], e);
   return { contract: toAddress(contract), selector: toHex(selector) };
+}
+
+// ---- Native holders (Pattern 1: events flag who changed, storage holds truth) -
+
+// Accounts whose native balance changed in this event. Covers every
+// balance-mutating Balances event so no holder drifts; returns [] for anything
+// else. We only need the addresses — the authoritative amount comes from storage.
+export function balanceTouchedAccounts(e: Event): string[] {
+  switch (e.name) {
+    case "Balances.Transfer": {
+      const { from, to } = balancesEvents.transfer.v9.decode(e);
+      return [toAddress(from), toAddress(to)];
+    }
+    case "Balances.Endowed":
+      return [toAddress(balancesEvents.endowed.v9.decode(e).account)];
+    case "Balances.BalanceSet":
+      return [toAddress(balancesEvents.balanceSet.v9.decode(e).who)];
+    case "Balances.Reserved":
+      return [toAddress(balancesEvents.reserved.v9.decode(e).who)];
+    case "Balances.Unreserved":
+      return [toAddress(balancesEvents.unreserved.v9.decode(e).who)];
+    case "Balances.Deposit":
+      return [toAddress(balancesEvents.deposit.v9.decode(e).who)];
+    case "Balances.Withdraw":
+      return [toAddress(balancesEvents.withdraw.v9.decode(e).who)];
+    case "Balances.Slashed":
+      return [toAddress(balancesEvents.slashed.v9.decode(e).who)];
+    case "Balances.Minted":
+      return [toAddress(balancesEvents.minted.v9.decode(e).who)];
+    case "Balances.Burned":
+      return [toAddress(balancesEvents.burned.v9.decode(e).who)];
+    default:
+      return [];
+  }
+}
+
+export interface AccountBalance {
+  free: bigint;
+  reserved: bigint;
+  nonce: number;
+}
+
+// Authoritative System.Account read for a set of addresses at a block.
+// Undefined entries (reaped/never-existed accounts) map to a zero balance.
+export async function readAccounts(
+  block: Block,
+  addresses: string[],
+): Promise<Map<string, AccountBalance>> {
+  const out = new Map<string, AccountBalance>();
+  if (addresses.length === 0) return out;
+  const infos = await systemStorage.account.v9.getMany(block, addresses);
+  addresses.forEach((addr, i) => {
+    const info = infos[i];
+    out.set(
+      addr,
+      info
+        ? { free: info.data.free, reserved: info.data.reserved, nonce: info.nonce }
+        : { free: 0n, reserved: 0n, nonce: 0 },
+    );
+  });
+  return out;
+}
+
+export async function readTotalIssuance(block: Block): Promise<bigint> {
+  return (await balancesStorage.totalIssuance.v9.get(block)) ?? 0n;
+}
+
+// One-time seed: stream the entire System.Account map at `block` so
+// genesis-funded accounts (which emit no events) appear immediately.
+export async function* scanAllAccounts(
+  block: Block,
+): AsyncIterable<[string, AccountBalance]> {
+  for await (const pairs of systemStorage.account.v9.getPairsPaged(500, block)) {
+    for (const [addr, info] of pairs) {
+      if (!info) continue;
+      yield [
+        toAddress(addr),
+        { free: info.data.free, reserved: info.data.reserved, nonce: info.nonce },
+      ];
+    }
+  }
 }

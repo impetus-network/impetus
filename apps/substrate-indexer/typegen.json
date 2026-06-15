@@ -35,8 +35,23 @@
     "Session": {
       "storage": ["Validators"]
     },
+    "System": {
+      "storage": ["Account"]
+    },
     "Balances": {
-      "events": ["Transfer"]
+      "events": [
+        "Transfer",
+        "Endowed",
+        "Deposit",
+        "Withdraw",
+        "Reserved",
+        "Unreserved",
+        "Slashed",
+        "BalanceSet",
+        "Minted",
+        "Burned"
+      ],
+      "storage": ["TotalIssuance"]
     },
     "GaslessRegistry": {
       "events": ["RuleSet", "RuleRemoved"]
