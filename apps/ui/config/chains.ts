@@ -5,6 +5,6 @@ export const impetus = defineChain({
   name: "Impetus",
   nativeCurrency: { name: "Impetus Token", symbol: "IPT", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://rpc-proxy-production-a44c.up.railway.app"] },
+    default: { http: ["https://archive-sg.impetus.network"] },
   },
 });

@@ -1,12 +1,12 @@
 // Shared copy for the validator guide, consumed by the live page and the
 // layout preview variants so the steps stay identical across designs.
 
-export const RUN_NODE = `# Save the raw chain spec locally — it must be byte-identical to the
-# rest of the network (same sha256), or your node will fork.
-#   impetus.json
+export const RUN_NODE = `# 1. Fetch the raw chain spec (must be byte-identical to the network, or you fork).
+#    Genesis hash: 0x07dfd394782f3c1f60dc97a4a792ff3e44f44ebe675babb2beb9898c5a9a1a79
+curl -fsSL "https://gist.githubusercontent.com/DuanTranHuy/0b4059bf6f99d043672abd0d6373267b/raw/impetus.json" -o impetus.json
 
-# Run a synced validator node (Docker). RPC is bound to localhost only
-# because --rpc-methods unsafe is required for the next step.
+# 2. Run a synced validator node (Docker). RPC is bound to localhost only
+#    because --rpc-methods unsafe is required for the next step.
 docker run -d --name impetus-validator --restart unless-stopped \\
   -p 127.0.0.1:9944:9944 -p 30333:30333 \\
   -v impetus-data:/data \\
@@ -14,7 +14,7 @@ docker run -d --name impetus-validator --restart unless-stopped \\
   --entrypoint impetus-node tranhuyduan/impetus-railway:v0.3.0 \\
   --base-path /data --chain /spec.json --name "my-validator" \\
   --validator --sync warp --rpc-methods unsafe --rpc-cors all \\
-  --bootnodes "<PUBLIC_BOOTNODE_MULTIADDR>"
+  --bootnodes "/ip4/96.9.228.200/tcp/30333/p2p/12D3KooWPH4Dp9n9csjEgWy3MWsnrRfEy1ewCYkahG59uNt5S3q9 /ip4/116.118.47.48/tcp/30333/p2p/12D3KooWDLzWZxgqwtab7mH2YLb7NWEgpNdkumHmJRySnmEgBjEL /ip4/157.10.198.51/tcp/30333/p2p/12D3KooWATCQCifMZqrAabzLsSa5YQEWPDRw3fVpCukKvPR1swZB"
 
 # Watch it sync to the finalized head:
 docker logs -f impetus-validator`;
