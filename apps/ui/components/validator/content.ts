@@ -2,8 +2,8 @@
 // layout preview variants so the steps stay identical across designs.
 
 export const RUN_NODE = `# 1. Fetch the raw chain spec (must be byte-identical to the network, or you fork).
-#    Genesis hash: 0x07dfd394782f3c1f60dc97a4a792ff3e44f44ebe675babb2beb9898c5a9a1a79
-curl -fsSL "https://gist.githubusercontent.com/DuanTranHuy/0b4059bf6f99d043672abd0d6373267b/raw/impetus.json" -o impetus.json
+#    Genesis hash: 0x4fa577677170302035f28d3291adaae262353854d4e4dbb469fa5cce2c29daeb
+curl -fsSL "https://gist.githubusercontent.com/DuanTranHuy/7390587912606cdad5a3d329f74f7591/raw/impetus.json" -o impetus.json
 
 # 2. Run a synced validator node (Docker). RPC is bound to localhost only
 #    because --rpc-methods unsafe is required for the next step.
