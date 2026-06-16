@@ -480,7 +480,9 @@ fn genesis_patch(
 			(
 				H160::from(*account),
 				fp_evm::GenesisAccount {
-					balance: U256::from(1_000_000u128) * U256::from(UNITS),
+					// No balance here: pallet_balances is the sole funding source. Setting it
+					// in both genesis configs double-counts into TotalIssuance.
+					balance: U256::zero(),
 					code: Default::default(),
 					nonce: Default::default(),
 					storage: Default::default(),
@@ -542,7 +544,9 @@ fn impetus_genesis_patch(
 			(
 				H160::from(*account),
 				fp_evm::GenesisAccount {
-					balance: U256::from(1_000_000u128) * U256::from(UNITS),
+					// No balance here: pallet_balances is the sole funding source. Setting it
+					// in both genesis configs double-counts into TotalIssuance.
+					balance: U256::zero(),
 					code: Default::default(),
 					nonce: Default::default(),
 					storage: Default::default(),
@@ -813,15 +817,18 @@ fn impetus_production_genesis_patch(
 		.unwrap_or(validator_count);
 
 	// -----------------------------------------------------------------
-	// 8. EVM accounts mirror the balances map exactly
+	// 8. EVM accounts register every balances-map address in the EVM with ZERO
+	//    balance. pallet_balances is the sole funding source — setting a balance
+	//    here too would double-count into TotalIssuance (the 1B assert above only
+	//    sums the balances pallet, so it would not catch the duplication).
 	// -----------------------------------------------------------------
 	let evm_accounts: BTreeMap<H160, fp_evm::GenesisAccount> = balances
 		.iter()
-		.map(|(account, &bal)| {
+		.map(|(account, &_bal)| {
 			(
 				H160::from(*account),
 				fp_evm::GenesisAccount {
-					balance: U256::from(bal),
+					balance: U256::zero(),
 					code: Default::default(),
 					nonce: Default::default(),
 					storage: Default::default(),
