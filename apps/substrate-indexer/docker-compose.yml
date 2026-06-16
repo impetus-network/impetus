@@ -9,7 +9,7 @@ services:
     # Internal only — reached by processor/graphql over the compose default
     # network as `db:5432`. Not exposed to the host.
     volumes:
-      - pgdata4:/var/lib/postgresql/data
+      - pgdata5:/var/lib/postgresql/data
 
   processor:
     build: .
@@ -61,6 +61,6 @@ networks:
     external: true
 
 volumes:
-  # pgdata4: fresh volume for the clean 1B-genesis relaunch (0x4fa5…daeb, fresh
-  # block history) — forces a clean DB so the processor re-syncs from block 0.
-  pgdata4:
+  # pgdata5: fresh volume for the v0.3.1 clean-build-spec relaunch
+  # (genesis 0xab57…0409) — clean DB so the processor re-syncs from block 0.
+  pgdata5:
