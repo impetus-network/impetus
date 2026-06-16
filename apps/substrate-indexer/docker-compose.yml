@@ -9,7 +9,7 @@ services:
     # Internal only — reached by processor/graphql over the compose default
     # network as `db:5432`. Not exposed to the host.
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata2:/var/lib/postgresql/data
 
   processor:
     build: .
@@ -61,4 +61,6 @@ networks:
     external: true
 
 volumes:
-  pgdata:
+  # pgdata2: fresh volume for the 2026-06-16 mainnet relaunch (new genesis) —
+  # forces a clean DB so the processor re-syncs from block 0 of the new chain.
+  pgdata2:
