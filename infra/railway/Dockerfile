@@ -8,8 +8,11 @@
 
 FROM rust:1.94-bookworm AS chef
 ARG CACHE_BUST=1
+# Fetch git deps (polkadot-sdk) via the git CLI, not libgit2: libgit2's TLS is
+# flaky under cross-arch emulation (SSL class=Ssl errors). Retry transient fails.
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true CARGO_NET_RETRY=10
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends clang cmake protobuf-compiler && \
+    apt-get install -y --no-install-recommends clang cmake protobuf-compiler git && \
     rm -rf /var/lib/apt/lists/*
 RUN cargo install cargo-chef --locked
 RUN rustup target add wasm32-unknown-unknown && rustup component add rust-src
