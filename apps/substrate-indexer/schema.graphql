@@ -95,9 +95,51 @@ type Holder @entity {
   id: ID! # account address (0x…, AccountId20)
   free: BigInt!
   reserved: BigInt!
+  frozen: BigInt! # locks on free — the explorer's "locked" balance
   total: BigInt! @index # free + reserved — the value the holders ranking sorts on
   nonce: Int!
   updatedAt: Int! # block height of the last balance read
+}
+
+# EVM block (Frontier: substrate height == EVM block number, 1:1). Sourced via
+# canonical eth_getBlockByNumber against the archive node — powers the explorer's
+# block list + block detail in the dApp.
+type Block @entity {
+  id: ID! # height as string
+  height: Int! @index # ordering + lookup-by-number
+  hash: String! @index # lookup / search by block hash
+  parentHash: String!
+  timestamp: DateTime! @index
+  author: String # block author / miner (0x H160)
+  gasUsed: BigInt!
+  gasLimit: BigInt!
+  size: BigInt!
+  txCount: Int!
+  baseFeePerGas: BigInt
+}
+
+# EVM transaction (one per Ethereum.transact extrinsic), sourced from
+# eth_getBlockByNumber + eth_getBlockReceipts. Powers tx detail and the
+# per-block / per-address transaction lists (filter on from/to).
+type EvmTransaction @entity {
+  id: ID! # tx hash (0x…64), case-as-returned by eth RPC
+  block: Int! @index
+  timestamp: DateTime!
+  txIndex: Int!
+  from: String! @index
+  to: String @index # null for contract-creation
+  value: BigInt!
+  input: String!
+  nonce: Int!
+  gasUsed: BigInt!
+  gasPrice: BigInt!
+  effectiveGasPrice: BigInt! # fee = gasUsed * effectiveGasPrice
+  cumulativeGasUsed: BigInt!
+  maxFeePerGas: BigInt
+  maxPriorityFeePerGas: BigInt
+  txType: Int
+  success: Boolean!
+  contractCreated: String @index # created contract address (null if not a deploy)
 }
 
 # Chain-wide singleton (id = "singleton"): supply + holder count for the

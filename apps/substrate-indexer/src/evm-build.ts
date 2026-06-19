@@ -1,7 +1,6 @@
-// Maps canonical eth-RPC responses into the exact row shapes of the four
-// Subscan-style explorer tables. All numeric/bigint columns are carried as
-// decimal STRINGS (never JS numbers) so 256-bit wei values never lose
-// precision; pg binds them straight into numeric/int8 columns.
+// Maps canonical eth-RPC responses into Squid Block / EvmTransaction entities,
+// which the TypeORM store persists (and rolls back automatically on reorg via
+// supportHotBlocks) and the GraphQL server (OpenReader) serves to the dApp.
 
 import {
   EthRpc,
@@ -10,106 +9,45 @@ import {
   type EvmRpcReceipt,
   type EvmRpcTx,
 } from "./evm-rpc";
+import { Block, EvmTransaction } from "./model";
 
-// Stride between blocks for the synthetic, deterministic transaction_id
-// (block_num * STRIDE + transaction_index). Reorg-stable (same tx -> same id),
-// monotonic with chain order, and < 2^53 for any realistic height (the
-// explorer's safeNum throws above Number.MAX_SAFE_INTEGER). 1e5 >> max txs/block.
-export const TX_ID_STRIDE = 100_000n;
-
-export interface EvmBlockRow {
-  block_num: string;
-  block_hash: string | null;
-  parent_hash: string | null;
-  sha3_uncles: string | null;
-  author: string | null;
-  miner: string | null;
-  state_root: string | null;
-  transactions_root: string | null;
-  receipts_root: string | null;
-  gas_used: string | null;
-  gas_limit: string | null;
-  extra_data: string | null;
-  logs_bloom: string | null;
-  timestamp: string | null;
-  block_size: string | null;
-  transaction_count: number;
-  base_fee_per_gas: string | null;
+export interface EvmBatchData {
+  blocks: Block[];
+  txs: EvmTransaction[];
 }
 
-export interface EvmTxRow {
-  hash: string;
-  block_num: string;
-  block_timestamp: string;
-  from_address: string;
-  to_address: string | null;
-  input_data: string;
-  nonce: string;
-  gas_limit: string;
-  gas_price: string;
-  gas_used: string;
-  contract: string | null;
-  success: boolean;
-  r: string | null;
-  s: string | null;
-  v: string | null;
-  value: string;
-  effective_gas_price: string;
-  max_priority_fee_per_gas: string;
-  max_fee_per_gas: string;
-  cumulative_gas_used: string;
-  txn_type: string | null;
-  transaction_index: string;
-  transaction_id: string;
+/** hex quantity -> bigint (0n for null/undefined). */
+function bi(h: string | null | undefined): bigint {
+  return h == null ? 0n : BigInt(h);
 }
 
-export interface EvmContractRow {
-  address: string;
-  deployer: string;
-  block_num: string;
-  tx_hash: string;
-  deploy_at: string;
-  creation_bytecode: string;
+/** hex quantity -> bigint, preserving null. */
+function biNull(h: string | null | undefined): bigint | null {
+  return h == null ? null : BigInt(h);
 }
 
-export interface EvmBatchRows {
-  blocks: EvmBlockRow[];
-  txs: EvmTxRow[];
-  contracts: EvmContractRow[];
-}
-
-/** hex quantity -> decimal string (defaults to "0" for null/undefined). */
-function hb(h: string | null | undefined): string {
-  return h == null ? "0" : BigInt(h).toString();
-}
-
-/** hex quantity -> decimal string, preserving null. */
-function hbNull(h: string | null | undefined): string | null {
-  return h == null ? null : BigInt(h).toString();
+/** hex quantity -> number (only for small values: index, nonce, type). */
+function num(h: string | null | undefined): number {
+  return h == null ? 0 : Number(BigInt(h));
 }
 
 const lc = (s: string): string => s.toLowerCase();
 
-function mapBlock(b: EvmRpcBlock): EvmBlockRow {
-  return {
-    block_num: hb(b.number),
-    block_hash: b.hash ?? null,
-    parent_hash: b.parentHash ?? null,
-    sha3_uncles: b.sha3Uncles ?? null,
+function mapBlock(b: EvmRpcBlock): Block {
+  const height = num(b.number);
+  return new Block({
+    id: String(height),
+    height,
+    hash: b.hash,
+    parentHash: b.parentHash,
+    timestamp: new Date(num(b.timestamp) * 1000),
     author: b.miner ? lc(b.miner) : null,
-    miner: b.miner ? lc(b.miner) : null,
-    state_root: b.stateRoot ?? null,
-    transactions_root: b.transactionsRoot ?? null,
-    receipts_root: b.receiptsRoot ?? null,
-    gas_used: hb(b.gasUsed),
-    gas_limit: hb(b.gasLimit),
-    extra_data: b.extraData ?? null,
-    logs_bloom: b.logsBloom ?? null,
-    timestamp: hb(b.timestamp),
-    block_size: hbNull(b.size),
-    transaction_count: b.transactions.length,
-    base_fee_per_gas: hbNull(b.baseFeePerGas),
-  };
+    gasUsed: bi(b.gasUsed),
+    gasLimit: bi(b.gasLimit),
+    size: bi(b.size),
+    txCount: b.transactions.length,
+    baseFeePerGas: biNull(b.baseFeePerGas),
+  });
 }
 
 function mapTx(
@@ -117,82 +55,55 @@ function mapTx(
   b: EvmRpcBlock,
   tx: EvmRpcTx,
   receipt: EvmRpcReceipt,
-): EvmTxRow {
-  const txIndex = BigInt(tx.transactionIndex);
-  const transactionId = (BigInt(height) * TX_ID_STRIDE + txIndex).toString();
-  // effective_gas_price drives the explorer's fee (gas_used * effective_gas_price);
+): EvmTransaction {
+  // effective_gas_price drives the explorer's fee (gasUsed * effectiveGasPrice);
   // fall back to the legacy gasPrice if a receipt omits it.
   const effective =
     receipt.effectiveGasPrice != null
-      ? hb(receipt.effectiveGasPrice)
-      : hb(tx.gasPrice);
-  return {
-    hash: tx.hash,
-    block_num: String(height),
-    block_timestamp: hb(b.timestamp),
-    from_address: lc(tx.from),
-    to_address: tx.to ? lc(tx.to) : null,
-    input_data: tx.input,
-    nonce: hb(tx.nonce),
-    gas_limit: hb(tx.gas),
-    gas_price: hb(tx.gasPrice),
-    gas_used: hb(receipt?.gasUsed),
-    contract: receipt.contractAddress ? lc(receipt.contractAddress) : null,
+      ? bi(receipt.effectiveGasPrice)
+      : bi(tx.gasPrice);
+  return new EvmTransaction({
+    id: tx.hash,
+    block: height,
+    timestamp: new Date(num(b.timestamp) * 1000),
+    txIndex: num(tx.transactionIndex),
+    from: lc(tx.from),
+    to: tx.to ? lc(tx.to) : null,
+    value: bi(tx.value),
+    input: tx.input,
+    nonce: num(tx.nonce),
+    gasUsed: bi(receipt.gasUsed),
+    gasPrice: bi(tx.gasPrice),
+    effectiveGasPrice: effective,
+    cumulativeGasUsed: bi(receipt.cumulativeGasUsed),
+    maxFeePerGas: biNull(tx.maxFeePerGas),
+    maxPriorityFeePerGas: biNull(tx.maxPriorityFeePerGas),
+    txType: tx.type != null ? num(tx.type) : null,
     // A mined tx is success unless its receipt explicitly reports status 0x0.
     success: receipt.status !== "0x0",
-    r: tx.r ?? null,
-    s: tx.s ?? null,
-    v: hbNull(tx.v),
-    value: hb(tx.value),
-    effective_gas_price: effective,
-    max_priority_fee_per_gas:
-      tx.maxPriorityFeePerGas != null ? hb(tx.maxPriorityFeePerGas) : "-1",
-    max_fee_per_gas: hb(tx.maxFeePerGas),
-    cumulative_gas_used: hb(receipt.cumulativeGasUsed),
-    txn_type: hbNull(tx.type),
-    transaction_index: txIndex.toString(),
-    transaction_id: transactionId,
-  };
-}
-
-function mapContract(
-  height: number,
-  b: EvmRpcBlock,
-  tx: EvmRpcTx,
-  receipt: EvmRpcReceipt,
-): EvmContractRow {
-  return {
-    address: lc(receipt.contractAddress as string),
-    deployer: lc(tx.from),
-    block_num: String(height),
-    tx_hash: tx.hash,
-    deploy_at: hb(b.timestamp),
-    creation_bytecode: tx.input,
-  };
+    contractCreated: receipt.contractAddress ? lc(receipt.contractAddress) : null,
+  });
 }
 
 /**
  * Fetch and map the EVM data for every block height in the batch.
- * One eth_getBlockByNumber per block (needed for evm_blocks even when empty);
- * receipts fetched only for blocks that actually carry transactions.
+ * One eth_getBlockByNumber per block (needed even for empty blocks);
+ * receipts fetched only for blocks that carry transactions.
  *
- * Squid delivers each block exactly once and this writer is outside its
- * hot-block rollback, so a null block or a missing receipt is NEVER skipped --
- * we THROW, which fails the batch and makes Squid retry it. Skipping would leave
- * a permanent hole in evm_blocks/evm_transactions or silently record a
- * receipt-less tx as success=true / gas_used=0.
+ * A null block or a missing receipt is NEVER skipped -- we THROW so Squid
+ * retries the batch (otherwise an idle RPC blip would drop a block/tx forever).
  */
-export async function buildEvmRows(
+export async function buildEvmData(
   eth: EthRpc,
   heights: readonly number[],
   concurrency = 10,
-): Promise<EvmBatchRows> {
+): Promise<EvmBatchData> {
   const per = await mapLimit(heights, concurrency, async (height) => {
     const b = await eth.getBlock(height);
     if (!b) {
       throw new Error(`eth_getBlockByNumber returned null for height ${height}`);
     }
-    const blockRow = mapBlock(b);
+    const block = mapBlock(b);
     const receipts = await eth.getBlockReceipts(
       height,
       b.transactions.map((t) => t.hash),
@@ -200,30 +111,22 @@ export async function buildEvmRows(
     const byHash = new Map<string, EvmRpcReceipt>(
       receipts.map((r) => [r.transactionHash.toLowerCase(), r]),
     );
-    const txRows: EvmTxRow[] = [];
-    const contractRows: EvmContractRow[] = [];
+    const txs: EvmTransaction[] = [];
     for (const tx of b.transactions) {
       const receipt = byHash.get(tx.hash.toLowerCase());
       if (!receipt) {
-        throw new Error(
-          `missing receipt for tx ${tx.hash} in block ${height}`,
-        );
+        throw new Error(`missing receipt for tx ${tx.hash} in block ${height}`);
       }
-      txRows.push(mapTx(height, b, tx, receipt));
-      if (receipt.contractAddress) {
-        contractRows.push(mapContract(height, b, tx, receipt));
-      }
+      txs.push(mapTx(height, b, tx, receipt));
     }
-    return { blockRow, txRows, contractRows };
+    return { block, txs };
   });
 
-  const blocks: EvmBlockRow[] = [];
-  const txs: EvmTxRow[] = [];
-  const contracts: EvmContractRow[] = [];
+  const blocks: Block[] = [];
+  const txs: EvmTransaction[] = [];
   for (const p of per) {
-    blocks.push(p.blockRow);
-    txs.push(...p.txRows);
-    contracts.push(...p.contractRows);
+    blocks.push(p.block);
+    txs.push(...p.txs);
   }
-  return { blocks, txs, contracts };
+  return { blocks, txs };
 }

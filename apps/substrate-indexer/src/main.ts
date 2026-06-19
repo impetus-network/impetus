@@ -13,16 +13,16 @@ import {
   GaslessRule,
   Holder,
   ChainStat,
+  Block,
+  EvmTransaction,
 } from "./model";
 import * as m from "./mapping";
-import { createEvmWriter, type BalanceRow } from "./sql-writer";
 import { EthRpc } from "./evm-rpc";
-import { buildEvmRows } from "./evm-build";
+import { buildEvmData } from "./evm-build";
 
-// EVM explorer tables: sourced via canonical eth RPC against the SAME archive
+// EVM block/tx entities: sourced via canonical eth RPC against the SAME archive
 // node the processor ingests from (Frontier serves eth_* on the substrate RPC
-// endpoint), written to the same Postgres as the Squid store.
-const evmWriter = createEvmWriter();
+// endpoint), persisted through the Squid TypeORM store (reorg-safe).
 const eth = new EthRpc(process.env.RPC_ENDPOINT as string);
 
 // Extract the signer (0x-hex) of a signed extrinsic. On AccountId20 the call
@@ -42,8 +42,6 @@ function signerOf(call: Call): string | undefined {
 }
 
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
-  await evmWriter.init();
-
   const validators = new Map<string, Validator>();
   const nominators = new Map<string, Nominator>();
   const pools = new Map<number, Pool>();
@@ -306,15 +304,15 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   await ctx.store.insert(transfers);
   await ctx.store.upsert([...gaslessRules.values()]);
 
-  // ---- EVM explorer tables (evm_blocks / evm_transactions / evm_contracts) --
-  // Source canonical EVM data for every block in the batch via eth RPC, then
-  // write idempotently (DELETE-range + INSERT) so reorgs self-heal on Squid's
-  // re-delivery from the fork point.
+  // ---- EVM block/tx entities (Block / EvmTransaction) ----------------------
+  // Source canonical EVM data for every block in the batch via eth RPC and
+  // persist through the TypeORM store; supportHotBlocks rolls these back on a
+  // reorg just like the staking entities.
   if (ctx.blocks.length > 0) {
     const heights = ctx.blocks.map((b) => b.header.height);
-    const firstHeight = heights[0]!;
-    const evmRows = await buildEvmRows(eth, heights);
-    await evmWriter.writeBatch(firstHeight, evmRows);
+    const { blocks, txs } = await buildEvmData(eth, heights);
+    await ctx.store.upsert(blocks);
+    await ctx.store.upsert(txs);
   }
 
   // ---- Native holders (Pattern 1) ------------------------------------------
@@ -324,15 +322,13 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   if (ctx.blocks.length > 0) {
     const head = ctx.blocks[ctx.blocks.length - 1].header;
     const holders = new Map<string, Holder>();
-    // Same authoritative balances feed the explorer's balance_accounts table
-    // (balance<-free, locked<-frozen, reserved<-reserved, nonce).
-    const accountBalances = new Map<string, m.AccountBalance>();
 
     const toHolder = (address: string, bal: m.AccountBalance): Holder =>
       new Holder({
         id: address,
         free: bal.free,
         reserved: bal.reserved,
+        frozen: bal.frozen,
         total: bal.free + bal.reserved,
         nonce: bal.nonce,
         updatedAt: head.height,
@@ -351,7 +347,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
     if (!stat.seeded) {
       for await (const [address, bal] of m.scanAllAccounts(head)) {
         holders.set(address, toHolder(address, bal));
-        accountBalances.set(address, bal);
       }
       stat.seeded = true;
     }
@@ -360,25 +355,10 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
       const balances = await m.readAccounts(head, [...touchedAccounts]);
       for (const [address, bal] of balances) {
         holders.set(address, toHolder(address, bal));
-        accountBalances.set(address, bal);
       }
     }
 
     if (holders.size > 0) await ctx.store.upsert([...holders.values()]);
-
-    if (accountBalances.size > 0) {
-      const balanceRows: BalanceRow[] = [];
-      for (const [address, bal] of accountBalances) {
-        balanceRows.push({
-          address,
-          balance: bal.free.toString(),
-          locked: bal.frozen.toString(),
-          reserved: bal.reserved.toString(),
-          nonce: String(bal.nonce),
-        });
-      }
-      await evmWriter.upsertBalances(balanceRows);
-    }
 
     stat.totalIssuance = await m.readTotalIssuance(head);
     stat.holdersCount = await ctx.store.countBy(Holder, { total: MoreThan(0n) });

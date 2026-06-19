@@ -1,5 +1,5 @@
-module.exports = class Data1781366277385 {
-    name = 'Data1781366277385'
+module.exports = class Data1781865333685 {
+    name = 'Data1781865333685'
 
     async up(db) {
         await db.query(`CREATE TABLE "validator" ("id" character varying NOT NULL, "commission" integer NOT NULL, "blocked" boolean NOT NULL, "active" boolean NOT NULL, "elected" boolean NOT NULL, "self_bonded" numeric NOT NULL, "blocks_produced" integer NOT NULL, "last_block" integer, "updated_at" integer NOT NULL, CONSTRAINT "PK_ae0a943022c24bd60e7161e0fad" PRIMARY KEY ("id"))`)
@@ -17,9 +17,33 @@ module.exports = class Data1781366277385 {
         await db.query(`CREATE TABLE "transfer" ("id" character varying NOT NULL, "from" text NOT NULL, "to" text NOT NULL, "amount" numeric NOT NULL, "block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "extrinsic_hash" text, CONSTRAINT "PK_fd9ddbdd49a17afcbe014401295" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_be54ea276e0f665ffc38630fc0" ON "transfer" ("from") `)
         await db.query(`CREATE INDEX "IDX_4cbc37e8c3b47ded161f44c24f" ON "transfer" ("to") `)
+        await db.query(`CREATE TABLE "holder" ("id" character varying NOT NULL, "free" numeric NOT NULL, "reserved" numeric NOT NULL, "frozen" numeric NOT NULL, "total" numeric NOT NULL, "nonce" integer NOT NULL, "updated_at" integer NOT NULL, CONSTRAINT "PK_8266ed18d931b168de2723ad322" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_b3a9392a6d7281e285208d6e9b" ON "holder" ("total") `)
+        await db.query(`CREATE TABLE "block" ("id" character varying NOT NULL, "height" integer NOT NULL, "hash" text NOT NULL, "parent_hash" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "author" text, "gas_used" numeric NOT NULL, "gas_limit" numeric NOT NULL, "size" numeric NOT NULL, "tx_count" integer NOT NULL, "base_fee_per_gas" numeric, CONSTRAINT "PK_d0925763efb591c2e2ffb267572" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_bce676e2b005104ccb768495db" ON "block" ("height") `)
+        await db.query(`CREATE INDEX "IDX_f8fba63d7965bfee9f304c487a" ON "block" ("hash") `)
+        await db.query(`CREATE INDEX "IDX_5c67cbcf4960c1a39e5fe25e87" ON "block" ("timestamp") `)
+        await db.query(`CREATE TABLE "evm_transaction" ("id" character varying NOT NULL, "block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "tx_index" integer NOT NULL, "from" text NOT NULL, "to" text, "value" numeric NOT NULL, "input" text NOT NULL, "nonce" integer NOT NULL, "gas_used" numeric NOT NULL, "gas_price" numeric NOT NULL, "effective_gas_price" numeric NOT NULL, "cumulative_gas_used" numeric NOT NULL, "max_fee_per_gas" numeric, "max_priority_fee_per_gas" numeric, "tx_type" integer, "success" boolean NOT NULL, "contract_created" text, CONSTRAINT "PK_5cb059f05ba72ac04ac1cfb3775" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_860991c0ceb550f74945819cf2" ON "evm_transaction" ("block") `)
+        await db.query(`CREATE INDEX "IDX_b1e4ebcc60d8bd8fc6395faf8c" ON "evm_transaction" ("from") `)
+        await db.query(`CREATE INDEX "IDX_bc573238de6f226f69f6bc5ec6" ON "evm_transaction" ("to") `)
+        await db.query(`CREATE INDEX "IDX_1d3dce2991bb660b3eed4450eb" ON "evm_transaction" ("contract_created") `)
+        await db.query(`CREATE TABLE "chain_stat" ("id" character varying NOT NULL, "total_issuance" numeric NOT NULL, "holders_count" integer NOT NULL, "seeded" boolean NOT NULL, "updated_at" integer NOT NULL, CONSTRAINT "PK_15616375cf218c23f5f671c2f71" PRIMARY KEY ("id"))`)
     }
 
     async down(db) {
+        await db.query(`DROP TABLE "chain_stat"`)
+        await db.query(`DROP INDEX "public"."IDX_1d3dce2991bb660b3eed4450eb"`)
+        await db.query(`DROP INDEX "public"."IDX_bc573238de6f226f69f6bc5ec6"`)
+        await db.query(`DROP INDEX "public"."IDX_b1e4ebcc60d8bd8fc6395faf8c"`)
+        await db.query(`DROP INDEX "public"."IDX_860991c0ceb550f74945819cf2"`)
+        await db.query(`DROP TABLE "evm_transaction"`)
+        await db.query(`DROP INDEX "public"."IDX_5c67cbcf4960c1a39e5fe25e87"`)
+        await db.query(`DROP INDEX "public"."IDX_f8fba63d7965bfee9f304c487a"`)
+        await db.query(`DROP INDEX "public"."IDX_bce676e2b005104ccb768495db"`)
+        await db.query(`DROP TABLE "block"`)
+        await db.query(`DROP INDEX "public"."IDX_b3a9392a6d7281e285208d6e9b"`)
+        await db.query(`DROP TABLE "holder"`)
         await db.query(`DROP INDEX "public"."IDX_4cbc37e8c3b47ded161f44c24f"`)
         await db.query(`DROP INDEX "public"."IDX_be54ea276e0f665ffc38630fc0"`)
         await db.query(`DROP TABLE "transfer"`)
