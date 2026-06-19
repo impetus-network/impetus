@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState, type ReactElement } from "react";
+import { useMemo, useState, type FormEvent, type ReactElement } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatEther } from "viem";
 import {
   DappPanel,
@@ -12,6 +14,7 @@ import { shortHash } from "./mockData";
 import { HoldersPanel } from "./HoldersPanel";
 import { useFetchBlocks } from "~/hooks/useFetchBlocks";
 import { useScaffoldReadContract } from "~/hooks/useScaffoldReadContract";
+import { resolveSearch } from "~/components/blockexplorer/SearchBar";
 import type { LiveFeedState, TxKind } from "./types";
 
 const filters: Array<TxKind | "all"> = [
@@ -46,9 +49,19 @@ export function ExplorerPanels({
 }: {
   feed: LiveFeedState;
 }): ReactElement {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<TxKind | "all">("all");
   const [view, setView] = useState<"activity" | "holders">("activity");
+
+  function onSearch(event: FormEvent) {
+    event.preventDefault();
+    const target = resolveSearch(search);
+    if (target) {
+      router.push(target);
+      setSearch("");
+    }
+  }
   const { blocks: realBlocks, transactions: realTxs } = useFetchBlocks(8);
   const { data: validatorCount } = useScaffoldReadContract({
     contractName: "Staking",
@@ -70,7 +83,10 @@ export function ExplorerPanels({
 
   return (
     <div className="mt-10 space-y-6">
-      <div className="flex items-center gap-2 rounded-3xl bg-[#f5f0e0] p-2">
+      <form
+        className="flex items-center gap-2 rounded-3xl bg-[#f5f0e0] p-2"
+        onSubmit={onSearch}
+      >
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <span className="pl-4 text-lg text-[#6a6a6a]">⌕</span>
           <label className="sr-only" htmlFor="explorer-search">
@@ -89,11 +105,11 @@ export function ExplorerPanels({
         <button
           aria-describedby={searchHelperId}
           className="inline-flex min-h-12 items-center justify-center rounded-md bg-[#0a0a0a] px-6 text-sm font-semibold text-white transition hover:bg-[#1f1f1f]"
-          type="button"
+          type="submit"
         >
           Search
         </button>
-      </div>
+      </form>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <OverviewCard
@@ -146,9 +162,12 @@ export function ExplorerPanels({
         <DappPanel className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-[#0a0a0a]/10 px-5 py-4">
             <span className="text-base font-semibold">Latest blocks</span>
-            <span className="cursor-pointer text-xs text-[#6a6a6a]">
+            <Link
+              className="text-xs text-[#6a6a6a] hover:text-[#0a0a0a]"
+              href="/blockexplorer/blocks"
+            >
               View all blocks →
-            </span>
+            </Link>
           </div>
           <div className="divide-y divide-[#0a0a0a]/10">
             {realBlocks.length === 0 && (
@@ -157,8 +176,9 @@ export function ExplorerPanels({
               </p>
             )}
             {realBlocks.map((block) => (
-              <article
-                className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3.5"
+              <Link
+                className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3.5 transition hover:bg-[#f5f0e0]"
+                href={`/blockexplorer/block/${Number(block.number)}`}
                 key={block.hash}
               >
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f5f0e0] font-mono text-[11px] text-[#6a6a6a]">
@@ -185,7 +205,7 @@ export function ExplorerPanels({
                     {timeAgo(block.timestamp)}
                   </p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </DappPanel>
@@ -195,9 +215,12 @@ export function ExplorerPanels({
             <span className="text-base font-semibold">
               Latest transactions
             </span>
-            <span className="cursor-pointer text-xs text-[#6a6a6a]">
+            <Link
+              className="text-xs text-[#6a6a6a] hover:text-[#0a0a0a]"
+              href="/blockexplorer/txs"
+            >
               View all txs →
-            </span>
+            </Link>
           </div>
           <div className="flex gap-1 border-b border-[#0a0a0a]/10 px-4 py-3">
             {filters.map((item) => (
@@ -219,8 +242,9 @@ export function ExplorerPanels({
               </p>
             )}
             {explorerTxs.slice(0, 8).map((tx) => (
-              <article
-                className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3"
+              <Link
+                className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 transition hover:bg-[#f5f0e0]"
+                href={`/blockexplorer/tx/${tx.hash}`}
                 key={tx.hash}
               >
                 <TransactionTypeBadge type={tx.type} />
@@ -238,7 +262,7 @@ export function ExplorerPanels({
                     <Mono>{tx.value}</Mono> IPT
                   </p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </DappPanel>

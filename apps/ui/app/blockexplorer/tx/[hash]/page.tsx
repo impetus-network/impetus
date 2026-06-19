@@ -1,61 +1,81 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useTransaction, useTransactionReceipt } from "wagmi";
-import { formatEther, type Hash } from "viem";
-import { Address } from "~/components/scaffold/Address";
+import Link from "next/link";
+import { useExplorerTx } from "~/hooks/useExplorer";
+import {
+  AddrLink,
+  Card,
+  DetailRow,
+  StatusBadge,
+  formatIpt,
+  timeAgo,
+  txFeeIpt,
+} from "~/components/blockexplorer/ExplorerUI";
 
 export default function TxPage() {
   const { hash } = useParams<{ hash: string }>();
-  const { data: tx, isLoading } = useTransaction({ hash: hash as Hash });
-  const { data: receipt } = useTransactionReceipt({ hash: hash as Hash });
+  const { data: tx, isLoading } = useExplorerTx(hash);
 
-  if (isLoading) return <p className="text-muted-foreground">Loading...</p>;
-  if (!tx) return <p className="text-muted-foreground">Transaction not found.</p>;
+  if (isLoading) return <p className="text-muted-foreground">Loading transaction…</p>;
+  if (!tx)
+    return (
+      <p className="text-muted-foreground">
+        Transaction not indexed (yet). It may be pending or out of the synced range.
+      </p>
+    );
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">Transaction</h1>
-      <div className="rounded-lg border border-border p-6">
-        <dl className="grid gap-4">
-          <div>
-            <dt className="text-sm text-muted-foreground">Hash</dt>
-            <dd className="break-all font-mono text-sm">{tx.hash}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Status</dt>
-            <dd>
-              {receipt?.status === "success" ? (
-                <span className="font-medium text-success">Success</span>
-              ) : receipt?.status === "reverted" ? (
-                <span className="font-medium text-destructive">Reverted</span>
-              ) : (
-                <span className="text-muted-foreground">Pending</span>
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">From</dt>
-            <dd><Address address={tx.from} /></dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">To</dt>
-            <dd>{tx.to ? <Address address={tx.to} /> : "Contract Creation"}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Value</dt>
-            <dd className="font-mono">{formatEther(tx.value)} IPT</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Gas Used</dt>
-            <dd className="font-mono">{receipt?.gasUsed?.toString() ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Block</dt>
-            <dd className="font-mono">{tx.blockNumber?.toString()}</dd>
-          </div>
+      <Card>
+        <dl>
+          <DetailRow label="Hash">{tx.id}</DetailRow>
+          <DetailRow label="Status">
+            <StatusBadge success={tx.success} />
+          </DetailRow>
+          <DetailRow label="Block">
+            <Link
+              className="text-primary hover:underline"
+              href={`/blockexplorer/block/${tx.block}`}
+            >
+              #{tx.block.toLocaleString()}
+            </Link>
+          </DetailRow>
+          <DetailRow label="Timestamp">
+            {new Date(tx.timestamp).toUTCString()} ({timeAgo(tx.timestamp)})
+          </DetailRow>
+          <DetailRow label="From">
+            <AddrLink address={tx.from} />
+          </DetailRow>
+          <DetailRow label="To">
+            {tx.to ? (
+              <AddrLink address={tx.to} />
+            ) : tx.contractCreated ? (
+              <span>
+                Contract created: <AddrLink address={tx.contractCreated} />
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Contract creation</span>
+            )}
+          </DetailRow>
+          <DetailRow label="Value">{formatIpt(tx.value)} IPT</DetailRow>
+          <DetailRow label="Transaction fee">{txFeeIpt(tx)} IPT</DetailRow>
+          <DetailRow label="Gas used">
+            {BigInt(tx.gasUsed).toLocaleString()}
+          </DetailRow>
+          <DetailRow label="Effective gas price">
+            {BigInt(tx.effectiveGasPrice).toLocaleString()} wei
+          </DetailRow>
+          <DetailRow label="Nonce">{tx.nonce}</DetailRow>
+          {tx.txType != null && <DetailRow label="Type">{tx.txType}</DetailRow>}
+          <DetailRow label="Input data">
+            <span className="block max-h-40 overflow-auto break-all text-xs">
+              {tx.input === "0x" ? "0x (none)" : tx.input}
+            </span>
+          </DetailRow>
         </dl>
-      </div>
+      </Card>
     </div>
   );
 }
