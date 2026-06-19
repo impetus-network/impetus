@@ -7,7 +7,9 @@ import {
   AddrLink,
   Card,
   DetailRow,
+  DetailRowsSkeleton,
   ExplorerPage,
+  Skeleton,
   StatusBadge,
   formatIpt,
   timeAgo,
@@ -21,7 +23,10 @@ export default function TxPage() {
   if (isLoading)
     return (
       <ExplorerPage>
-        <p className="text-muted-foreground">Loading transaction…</p>
+        <Skeleton className="h-8 w-40" />
+        <Card>
+          <DetailRowsSkeleton rows={12} />
+        </Card>
       </ExplorerPage>
     );
   if (!tx)

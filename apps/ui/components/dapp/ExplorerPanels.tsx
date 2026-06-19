@@ -10,6 +10,7 @@ import {
   OverviewCard,
   TransactionTypeBadge,
 } from "./DappPrimitives";
+import { Skeleton } from "@artemis/coss-ui/ui/skeleton";
 import { shortHash } from "./mockData";
 import { HoldersPanel } from "./HoldersPanel";
 import { useFetchBlocks } from "~/hooks/useFetchBlocks";
@@ -170,11 +171,23 @@ export function ExplorerPanels({
             </Link>
           </div>
           <div className="divide-y divide-[#0a0a0a]/10">
-            {realBlocks.length === 0 && (
-              <p className="px-5 py-4 text-sm text-[#6a6a6a]">
-                Loading blocks...
-              </p>
-            )}
+            {realBlocks.length === 0 &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3.5"
+                  key={i}
+                >
+                  <Skeleton className="size-9 rounded-lg" />
+                  <div className="flex flex-col gap-1.5">
+                    <Skeleton className="h-3.5 w-20" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <Skeleton className="h-3.5 w-12" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+              ))}
             {realBlocks.map((block) => (
               <Link
                 className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3.5 transition hover:bg-[#f5f0e0]"

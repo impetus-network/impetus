@@ -7,7 +7,9 @@ import {
   Card,
   DetailRow,
   ExplorerPage,
+  ListRowsSkeleton,
   Pager,
+  Skeleton,
   TxRow,
   formatIpt,
 } from "~/components/blockexplorer/ExplorerUI";
@@ -18,7 +20,7 @@ export default function AddressPage() {
   const { address } = useParams<{ address: string }>();
   const addr = address.toLowerCase();
   const [offset, setOffset] = useState(0);
-  const { data: balance } = useAddressBalance(addr);
+  const { data: balance, isLoading: balLoading } = useAddressBalance(addr);
   const { data: txData, isLoading } = useAddressTxs(addr, PAGE, offset);
 
   const txs = txData?.evmTransactions ?? [];
@@ -32,9 +34,13 @@ export default function AddressPage() {
         <dl>
           <DetailRow label="Address">{address}</DetailRow>
           <DetailRow label="Balance">
-            <span className="text-base font-semibold">
-              {formatIpt(balance?.free ?? "0")} IPT
-            </span>
+            {balLoading ? (
+              <Skeleton className="h-5 w-32" />
+            ) : (
+              <span className="text-base font-semibold">
+                {formatIpt(balance?.free ?? "0")} IPT
+              </span>
+            )}
           </DetailRow>
           {balance && BigInt(balance.frozen) > 0n && (
             <DetailRow label="Locked">{formatIpt(balance.frozen)} IPT</DetailRow>
@@ -42,7 +48,9 @@ export default function AddressPage() {
           {balance && BigInt(balance.reserved) > 0n && (
             <DetailRow label="Reserved">{formatIpt(balance.reserved)} IPT</DetailRow>
           )}
-          <DetailRow label="Nonce">{balance?.nonce ?? 0}</DetailRow>
+          <DetailRow label="Nonce">
+            {balLoading ? <Skeleton className="h-4 w-12" /> : (balance?.nonce ?? 0)}
+          </DetailRow>
         </dl>
       </Card>
 
@@ -51,7 +59,7 @@ export default function AddressPage() {
           Transactions {total != null ? `(${total.toLocaleString()})` : ""}
         </h2>
         {isLoading ? (
-          <p className="py-2 text-sm text-muted-foreground">Loading…</p>
+          <ListRowsSkeleton rows={8} />
         ) : txs.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">
             No transactions for this address.

@@ -7,6 +7,7 @@ import {
   AddrLink,
   Card,
   ExplorerPage,
+  ListRowsSkeleton,
   Pager,
   timeAgo,
 } from "~/components/blockexplorer/ExplorerUI";
@@ -24,7 +25,7 @@ export default function BlocksPage() {
       <h1 className="text-2xl font-bold">Blocks</h1>
       <Card>
         {isLoading ? (
-          <p className="py-2 text-sm text-muted-foreground">Loading…</p>
+          <ListRowsSkeleton rows={12} />
         ) : (
           <>
             <div className="hidden grid-cols-[120px_1fr_auto_auto] gap-4 border-b border-border pb-2 text-xs uppercase text-muted-foreground sm:grid">

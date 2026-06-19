@@ -7,7 +7,10 @@ import {
   AddrLink,
   Card,
   DetailRow,
+  DetailRowsSkeleton,
   ExplorerPage,
+  ListRowsSkeleton,
+  Skeleton,
   TxRow,
   formatIpt,
   timeAgo,
@@ -22,7 +25,14 @@ export default function BlockPage() {
   if (isLoading)
     return (
       <ExplorerPage>
-        <p className="text-muted-foreground">Loading block…</p>
+        <Skeleton className="h-8 w-56" />
+        <Card>
+          <DetailRowsSkeleton rows={9} />
+        </Card>
+        <Card>
+          <Skeleton className="mb-3 h-5 w-40" />
+          <ListRowsSkeleton rows={3} />
+        </Card>
       </ExplorerPage>
     );
   if (!block)

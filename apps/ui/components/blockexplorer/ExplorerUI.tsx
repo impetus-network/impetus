@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { formatEther } from "viem";
 import type { ReactNode } from "react";
+import { Skeleton } from "@artemis/coss-ui/ui/skeleton";
 import type { ExplorerTx } from "~/hooks/useExplorer";
+
+export { Skeleton };
 
 // Page wrapper matching the dApp's shared PageShell column so the explorer
 // pages align with the rest of the app (AppLayout's <main> has no container).
@@ -42,6 +45,46 @@ export function txFeeIpt(tx: { gasUsed: string; effectiveGasPrice: string }): st
 
 export function Card({ children }: { children: ReactNode }) {
   return <div className="rounded-2xl border border-border bg-card p-6">{children}</div>;
+}
+
+/** Skeleton rows mirroring a key/value detail panel (block + tx detail). */
+export function DetailRowsSkeleton({ rows = 8 }: { rows?: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          className="grid gap-1 border-b border-border/60 py-3 last:border-0 sm:grid-cols-[180px_1fr] sm:gap-4"
+          key={i}
+        >
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-full max-w-md" />
+        </div>
+      ))}
+    </>
+  );
+}
+
+/** Skeleton rows mirroring a block/tx/address list row. */
+export function ListRowsSkeleton({ rows = 10 }: { rows?: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border/60 py-3 last:border-0"
+          key={i}
+        >
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <Skeleton className="h-4 w-40 max-w-full" />
+            <Skeleton className="h-3 w-56 max-w-full" />
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      ))}
+    </>
+  );
 }
 
 export function DetailRow({ label, children }: { label: string; children: ReactNode }) {

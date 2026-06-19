@@ -5,6 +5,7 @@ import { useExplorerTxs } from "~/hooks/useExplorer";
 import {
   Card,
   ExplorerPage,
+  ListRowsSkeleton,
   Pager,
   TxRow,
 } from "~/components/blockexplorer/ExplorerUI";
@@ -22,7 +23,7 @@ export default function TxsPage() {
       <h1 className="text-2xl font-bold">Transactions</h1>
       <Card>
         {isLoading ? (
-          <p className="py-2 text-sm text-muted-foreground">Loading…</p>
+          <ListRowsSkeleton rows={12} />
         ) : txs.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">
             No transactions indexed yet.
