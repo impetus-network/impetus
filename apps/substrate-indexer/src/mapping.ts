@@ -203,6 +203,7 @@ export function balanceTouchedAccounts(e: Event): string[] {
 export interface AccountBalance {
   free: bigint;
   reserved: bigint;
+  frozen: bigint; // locks on free balance — explorer `balance_accounts.locked`
   nonce: number;
 }
 
@@ -220,8 +221,13 @@ export async function readAccounts(
     out.set(
       addr,
       info
-        ? { free: info.data.free, reserved: info.data.reserved, nonce: info.nonce }
-        : { free: 0n, reserved: 0n, nonce: 0 },
+        ? {
+            free: info.data.free,
+            reserved: info.data.reserved,
+            frozen: info.data.frozen,
+            nonce: info.nonce,
+          }
+        : { free: 0n, reserved: 0n, frozen: 0n, nonce: 0 },
     );
   });
   return out;
@@ -241,7 +247,12 @@ export async function* scanAllAccounts(
       if (!info) continue;
       yield [
         toAddress(addr),
-        { free: info.data.free, reserved: info.data.reserved, nonce: info.nonce },
+        {
+          free: info.data.free,
+          reserved: info.data.reserved,
+          frozen: info.data.frozen,
+          nonce: info.nonce,
+        },
       ];
     }
   }

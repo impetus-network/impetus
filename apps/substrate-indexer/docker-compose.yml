@@ -9,7 +9,7 @@ services:
     # Internal only — reached by processor/graphql over the compose default
     # network as `db:5432`. Not exposed to the host.
     volumes:
-      - pgdata5:/var/lib/postgresql/data
+      - pgdata6:/var/lib/postgresql/data
 
   processor:
     build: .
@@ -61,6 +61,8 @@ networks:
     external: true
 
 volumes:
-  # pgdata5: fresh volume for the v0.3.1 clean-build-spec relaunch
-  # (genesis 0xab57…0409) — clean DB so the processor re-syncs from block 0.
-  pgdata5:
+  # pgdata6: fresh volume to re-sync from block 0 when the EVM explorer tables
+  # (evm_blocks / evm_transactions / balance_accounts / evm_contracts) were
+  # added — the processor was already at head, so a clean DB is the only way to
+  # backfill those tables from genesis. Re-derives staking/holders too.
+  pgdata6:

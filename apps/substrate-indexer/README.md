@@ -67,6 +67,51 @@ Or, once `src/types` + `db/migrations` exist, run everything in Docker:
 docker compose up --build
 ```
 
+## EVM explorer tables (block / tx / address, Etherscan-style)
+
+Alongside the Squid staking/holders entities, the processor also populates four
+**Subscan-shape SQL tables** that the `apps/explorer` block explorer reads
+directly via Prisma -- so the explorer queries by block, transaction, and
+address with **zero code changes** (only `DATABASE_URL` re-pointed at this
+Postgres):
+
+| Table | Feeds | Source |
+|-------|-------|--------|
+| `evm_blocks` | block list + detail, search-by-number | `eth_getBlockByNumber` |
+| `evm_transactions` | tx detail, block/address tx lists | `eth_getBlockByNumber` + `eth_getBlockReceipts` |
+| `balance_accounts` | address balances | `System.Account` storage (same read that feeds `Holder`: free->balance, frozen->locked, reserved->reserved) |
+| `evm_contracts` | contract list + detail | contract-creation txs (receipt `contractAddress`) |
+
+How it works (see `src/evm-rpc.ts`, `src/evm-build.ts`, `src/sql-writer.ts`):
+
+- EVM block/tx/receipt data is sourced via the node's **`eth_*` RPC on the same
+  `RPC_ENDPOINT`** (Frontier serves it on the substrate RPC port) -- no
+  pallet-ethereum SCALE decoding, no extra typegen. Substrate height == EVM
+  block number 1:1.
+- The four tables are created idempotently on startup (`db/subscan/0001-subscan-tables.sql`)
+  in the SAME `impetus_squid` Postgres, written by a raw `pg` pool **separate
+  from** the Squid TypeORM store.
+- `transaction_id` (the explorer's sole tx-list keyset) is the deterministic
+  `block_num * 100000 + transaction_index` -- reorg-stable and `< 2^53`.
+- **Reorg safety:** the raw writer is outside Squid's hot-block rollback, so each
+  batch does `DELETE … WHERE block_num >= firstHeight` then re-inserts. Squid
+  re-delivers from the fork point on a reorg, so the explorer tables self-heal.
+  A null block or missing receipt **throws** (batch retries) -- never a silent
+  gap.
+
+> **Go-live / backfill — IMPORTANT.** The processor only writes these tables for
+> blocks it processes *after* this code ships. An already-synced squid is at the
+> chain head, so the EVM tables would start mid-chain. To backfill from genesis,
+> **re-sync from block 0 on a fresh DB volume** (bump the `pgdata*` volume name in
+> `docker-compose.yml`, as done for past relaunches). The indexer DB is fully
+> re-derivable from chain, so wiping it is safe. The chain is young, so a full
+> re-sync is cheap.
+
+The explorer cutover itself is config-only (no app code): point
+`apps/explorer` `DATABASE_URL` at `impetus_squid` (read-only role recommended)
+and set `NEXT_PUBLIC_CHAIN_ID/NAME/TOKEN_SYMBOL` to the Impetus mainnet values
+(`infra/explorer/docker-compose.yml`).
+
 ## Wire the dApp (follow-up)
 
 Add `NEXT_PUBLIC_SQUID_URL=http://<host>:4350/graphql` and switch `/validators`
