@@ -368,6 +368,7 @@ model evm_transactions {
 
   @@index([block_num], map: "idx_evm_transactions_block_num")
   @@index([from_address], map: "idx_evm_transactions_sender")
+  @@index([to_address], map: "idx_evm_transactions_receiver")
 }
 
 model runtime_versions {
