@@ -6,6 +6,7 @@ import { useExplorerBlocks } from "~/hooks/useExplorer";
 import {
   AddrLink,
   Card,
+  ExplorerPage,
   Pager,
   timeAgo,
 } from "~/components/blockexplorer/ExplorerUI";
@@ -19,7 +20,7 @@ export default function BlocksPage() {
   const total = data?.blocksConnection.totalCount;
 
   return (
-    <div className="flex flex-col gap-6">
+    <ExplorerPage>
       <h1 className="text-2xl font-bold">Blocks</h1>
       <Card>
         {isLoading ? (
@@ -62,6 +63,6 @@ export default function BlocksPage() {
           </>
         )}
       </Card>
-    </div>
+    </ExplorerPage>
   );
 }

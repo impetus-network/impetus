@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useExplorerTxs } from "~/hooks/useExplorer";
-import { Card, Pager, TxRow } from "~/components/blockexplorer/ExplorerUI";
+import {
+  Card,
+  ExplorerPage,
+  Pager,
+  TxRow,
+} from "~/components/blockexplorer/ExplorerUI";
 
 const PAGE = 25;
 
@@ -13,7 +18,7 @@ export default function TxsPage() {
   const total = data?.evmTransactionsConnection.totalCount;
 
   return (
-    <div className="flex flex-col gap-6">
+    <ExplorerPage>
       <h1 className="text-2xl font-bold">Transactions</h1>
       <Card>
         {isLoading ? (
@@ -39,6 +44,6 @@ export default function TxsPage() {
           </>
         )}
       </Card>
-    </div>
+    </ExplorerPage>
   );
 }

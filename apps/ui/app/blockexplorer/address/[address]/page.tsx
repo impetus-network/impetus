@@ -6,6 +6,7 @@ import { useAddressBalance, useAddressTxs } from "~/hooks/useExplorer";
 import {
   Card,
   DetailRow,
+  ExplorerPage,
   Pager,
   TxRow,
   formatIpt,
@@ -24,7 +25,7 @@ export default function AddressPage() {
   const total = txData?.evmTransactionsConnection.totalCount;
 
   return (
-    <div className="flex flex-col gap-6">
+    <ExplorerPage>
       <h1 className="text-2xl font-bold">Address</h1>
 
       <Card>
@@ -72,6 +73,6 @@ export default function AddressPage() {
           </>
         )}
       </Card>
-    </div>
+    </ExplorerPage>
   );
 }

@@ -5,6 +5,16 @@ import { formatEther } from "viem";
 import type { ReactNode } from "react";
 import type { ExplorerTx } from "~/hooks/useExplorer";
 
+// Page wrapper matching the dApp's shared PageShell column so the explorer
+// pages align with the rest of the app (AppLayout's <main> has no container).
+export function ExplorerPage({ children }: { children: ReactNode }) {
+  return (
+    <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-8 sm:py-16">
+      <div className="flex flex-col gap-6">{children}</div>
+    </section>
+  );
+}
+
 export function shorten(value: string, head = 8, tail = 6): string {
   if (value.length <= head + tail) return value;
   return `${value.slice(0, head)}…${value.slice(-tail)}`;

@@ -7,9 +7,9 @@ import {
   AddrLink,
   Card,
   DetailRow,
+  ExplorerPage,
   TxRow,
   formatIpt,
-  shorten,
   timeAgo,
 } from "~/components/blockexplorer/ExplorerUI";
 
@@ -19,16 +19,21 @@ export default function BlockPage() {
   const { data: block, isLoading } = useExplorerBlock(num);
   const { data: txs } = useExplorerBlockTxs(num);
 
-  if (isLoading) return <p className="text-muted-foreground">Loading block…</p>;
+  if (isLoading)
+    return (
+      <ExplorerPage>
+        <p className="text-muted-foreground">Loading block…</p>
+      </ExplorerPage>
+    );
   if (!block)
     return (
-      <p className="text-muted-foreground">
-        Block #{height} not indexed yet.
-      </p>
+      <ExplorerPage>
+        <p className="text-muted-foreground">Block #{height} not indexed yet.</p>
+      </ExplorerPage>
     );
 
   return (
-    <div className="flex flex-col gap-6">
+    <ExplorerPage>
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold">Block #{block.height.toLocaleString()}</h1>
         <div className="ml-auto flex gap-2 text-sm">
@@ -92,6 +97,6 @@ export default function BlockPage() {
           </div>
         )}
       </Card>
-    </div>
+    </ExplorerPage>
   );
 }
