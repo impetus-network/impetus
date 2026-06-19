@@ -12,6 +12,16 @@
 {
 	admin off
 	auto_https off
+
+	# This proxy runs behind Dokploy's Traefik (and on Railway, behind its edge),
+	# so the direct peer is always the reverse proxy. Trust private-range proxies
+	# and resolve the real caller from X-Forwarded-For — otherwise {remote_host}
+	# is the proxy's IP and the per-IP rate limit becomes a single GLOBAL bucket
+	# shared by every user (which then 429s everyone).
+	servers {
+		trusted_proxies static private_ranges
+		client_ip_headers X-Forwarded-For
+	}
 }
 
 :{$PORT:8080} {
@@ -26,23 +36,51 @@
 	}
 
 	handle {
-		# Block unless Origin OR Referer is on *.impetus.network (apex or any sub).
-		@blocked {
-			not header_regexp Origin ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
-			not header_regexp Referer ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
-		}
-		respond @blocked "Forbidden: caller origin not allowed" 403
+		# `route` keeps these directives in written order (CORS first, then the
+		# preflight short-circuit, then origin gate + rate limit + proxy).
+		route {
+			# Allowed browser origins: apex or any *.impetus.network subdomain.
+			@allowed_origin header_regexp Origin ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
 
-		# Per-IP rate limit (caddy-ratelimit module).
-		rate_limit {
-			zone rpc {
-				key {remote_host}
-				events 120
-				window 1m
+			# Reflect CORS headers for allowed origins on EVERY response — including
+			# the 403/429 errors and the proxied JSON-RPC response. Without this the
+			# browser cannot even read an error (it surfaces as a CORS failure).
+			# `defer` applies them after the downstream handler writes the response.
+			header @allowed_origin {
+				Access-Control-Allow-Origin "{http.request.header.Origin}"
+				Access-Control-Allow-Methods "GET, POST, OPTIONS"
+				Access-Control-Allow-Headers "Content-Type"
+				Access-Control-Max-Age "86400"
+				Vary Origin
+				defer
 			}
-		}
 
-		# JSON-RPC (POST) and WebSocket upgrades both proxy transparently.
-		reverse_proxy {$UPSTREAM:rpc-singapore.railway.internal:9944}
+			# Answer the CORS preflight directly: never proxy OPTIONS upstream and
+			# never let it consume the rate-limit budget (preflights double request
+			# volume otherwise).
+			@preflight method OPTIONS
+			respond @preflight 204
+
+			# Block unless Origin OR Referer is on *.impetus.network (apex or any sub).
+			@blocked {
+				not header_regexp Origin ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
+				not header_regexp Referer ^https?://([a-z0-9-]+\.)*impetus\.network(:[0-9]+)?$
+			}
+			respond @blocked "Forbidden: caller origin not allowed" 403
+
+			# Per-IP rate limit (caddy-ratelimit module). Raised from 120 because a
+			# single wallet session polls block height + balances + multicall, which
+			# easily exceeds two-figure rates; preflights no longer count.
+			rate_limit {
+				zone rpc {
+					key {client_ip}
+					events 600
+					window 1m
+				}
+			}
+
+			# JSON-RPC (POST) and WebSocket upgrades both proxy transparently.
+			reverse_proxy {$UPSTREAM:rpc-singapore.railway.internal:9944}
+		}
 	}
 }
