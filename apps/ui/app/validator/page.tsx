@@ -125,9 +125,9 @@ export default function ValidatorPage(): ReactElement {
                 >
                   {state === "done" ? "✓" : s.n}
                 </span>
-                <span className="flex flex-col">
+                <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-sm font-bold text-[#0a0a0a]">{s.title}</span>
-                  <span className="text-[12px] text-[#6a6a6a]">{s.short}</span>
+                  <span className="truncate text-[12px] text-[#6a6a6a]">{s.short}</span>
                 </span>
               </button>
             );
