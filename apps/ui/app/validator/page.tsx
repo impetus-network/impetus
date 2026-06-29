@@ -138,7 +138,7 @@ export default function ValidatorPage(): ReactElement {
           </p>
         </nav>
 
-        <div className="rounded-[24px] border border-[#ece5d6] bg-white p-7">
+        <div className="min-w-0 rounded-[24px] border border-[#ece5d6] bg-white p-7">
           <Badge variant="secondary">
             Step {current.n}
             {current.onchain ? " · on-chain" : ""}
