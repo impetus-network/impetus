@@ -2,6 +2,21 @@
 
 EVM-compatible Substrate solochain (Frontier) with precompile extensibility, indexer, and Next.js UI.
 
+## Second Brain Mapping
+
+Use `/Users/huyduan/knowledge` for prior decisions, project context, and cross-project knowledge.
+
+Relevant pages:
+
+- `/Users/huyduan/knowledge/wiki/projects/impetus-blockchain.md`
+- `/Users/huyduan/knowledge/wiki/projects/impetus-infrastructure.md`
+- `/Users/huyduan/knowledge/wiki/concepts/evm-compatible-substrate-solochain.md`
+- `/Users/huyduan/knowledge/wiki/decisions/impetus-chain-launch-ops-model.md`
+- `/Users/huyduan/knowledge/wiki/syntheses/impetus-infrastructure-operating-model.md`
+- `/Users/huyduan/knowledge/wiki/syntheses/token-platform-architecture-options.md`
+
+Repo source is truth for current implementation. The second brain is truth for prior decisions, rationale, boundaries, and reusable context. If they conflict, prefer repo source and update or flag the wiki.
+
 - **Mainnet:** Impetus (chain id `388266`, token `IPT`, SS58 prefix `11434`, runtime `spec_name="impetus"`)
 - **Testnet:** Impulse (chain id `322644`, token `IPL`, SS58 prefix `11348`, runtime `spec_name="impulse"`)
 - **Dev mode:** alias of Impulse with manual seal enabled (`--chain dev`)

@@ -10,8 +10,10 @@
   "dependencies": {
     "@artemis/coss-ui": "workspace:*",
     "@artemis/shared": "workspace:*",
+    "@openfort/react": "1.0.16",
     "@rainbow-me/rainbowkit": "^2.2.10",
     "@tanstack/react-query": "^5.99.0",
+    "better-auth": "1.6.19",
     "lucide-react": "^1.8.0",
     "next": "^15.2.0",
     "react": "^19.2.0",

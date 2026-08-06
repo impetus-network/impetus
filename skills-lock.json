@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "pipes-sdk": {
+      "source": "subsquid-labs/skills",
+      "sourceType": "github",
+      "skillPath": "pipes-sdk/SKILL.md",
+      "computedHash": "5eeb1db11c69080a9adc3d20685f010d6e8cd632e72c48de889b76c06d947f2c"
+    },
+    "portal": {
+      "source": "subsquid-labs/skills",
+      "sourceType": "github",
+      "skillPath": "portal/SKILL.md",
+      "computedHash": "4ae4d1da6b885ea0d6170aff46b98d960a75f4bfbc6cdb74fca839eb506732b4"
+    }
+  }
+}

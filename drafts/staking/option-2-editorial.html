@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Staking — Option 2 · Editorial flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --black:#0a0a0a;--gray:#6a6a6a;--cream:#fffaf0;--cream2:#f5f0e0;
+    --pink:#ff4d8b;--lav:#b8a4ed;--ochre:#e8b94a;--teal:#1a3a3a;--green:#22c55e;--line:#e7e0d0;
+    --mono:'Geist Mono',monospace;--sans:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--cream);color:var(--black);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:56px 32px 100px}
+
+  .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--black);padding-bottom:28px}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--gray);font-weight:600}
+  h1{font-size:clamp(56px,9vw,118px);line-height:.86;letter-spacing:-.045em;font-weight:800;margin-top:10px}
+  .status{text-align:right}
+  .status .k{font-family:var(--mono);font-size:40px;font-weight:500;letter-spacing:-.02em}
+  .status .l{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gray);margin-top:4px}
+  .status .badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:11px;font-weight:700;color:#15803d}
+  .status .badge::before{content:"";width:7px;height:7px;border-radius:99px;background:var(--green)}
+
+  /* meta strip */
+  .meta{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+  .meta div{padding:22px 0;border-right:1px solid var(--line)}
+  .meta div:last-child{border-right:none;padding-left:22px}
+  .meta div:not(:first-child){padding-left:22px}
+  .meta .v{font-family:var(--mono);font-size:24px;font-weight:500}
+  .meta .c{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-top:6px}
+
+  .step{display:grid;grid-template-columns:120px 1fr;gap:28px;padding:48px 0;border-bottom:1px solid var(--line)}
+  .num{font-size:64px;font-weight:800;line-height:.8;letter-spacing:-.04em;color:var(--black)}
+  .num span{display:block;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-top:14px}
+  .step h2{font-size:30px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+  .step p.d{color:var(--gray);font-size:15px;line-height:1.5;max-width:520px;margin-bottom:22px}
+
+  label{display:block;font-size:12px;font-weight:600;letter-spacing:.02em;margin-bottom:8px;text-transform:uppercase;color:var(--gray)}
+  .field{position:relative;max-width:440px}
+  input{width:100%;font-family:var(--mono);font-size:20px;padding:12px 0;border:none;border-bottom:2px solid var(--black);background:transparent;outline:none}
+  input::placeholder{color:#c9c0ac}
+  .maxbtn{position:absolute;right:0;bottom:14px;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--pink);background:none;border:none;cursor:pointer}
+  .hint{font-size:13px;color:var(--gray);margin-top:12px}
+  .cta{margin-top:24px;display:inline-flex;align-items:center;gap:10px;background:var(--black);color:#fff;border:none;border-radius:0;padding:14px 26px;font-weight:700;font-size:14px;letter-spacing:.02em;cursor:pointer;transition:background .15s}
+  .cta:hover{background:var(--pink)}
+  .cta.line{background:none;color:var(--black);box-shadow:inset 0 0 0 2px var(--black)}
+  .cta.line:hover{background:var(--black);color:#fff}
+
+  .vrow{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);max-width:560px}
+  .vrow .addr{font-family:var(--mono);font-size:15px;flex:1}
+  .tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:0;letter-spacing:.04em}
+  .tag.ok{background:var(--black);color:#fff} .tag.warn{background:var(--pink);color:#fff}
+  .addv{margin-top:16px;font-size:13px;font-weight:700;background:none;border:none;color:var(--pink);cursor:pointer;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><div class="eyebrow">Nominated proof-of-stake — Impetus</div><h1>Stake.</h1></div>
+    <div class="status"><div class="k">12,500</div><div class="l">IPT active</div><div class="badge">Bonded</div></div>
+  </div>
+
+  <div class="meta">
+    <div style="padding-left:0"><div class="v">5</div><div class="c">Nominating</div></div>
+    <div><div class="v">10</div><div class="c">Min bond IPT</div></div>
+    <div><div class="v">342</div><div class="c">Active era</div></div>
+    <div><div class="v">~11.8%</div><div class="c">Est. APY</div></div>
+  </div>
+
+  <section class="step">
+    <div class="num">01<span>Bond</span></div>
+    <div>
+      <h2>Lock IPT into your stake</h2>
+      <p class="d">Bonded funds back the validators you nominate. Rewards are paid each era and compound automatically into your active stake.</p>
+      <div class="field"><label>Amount</label><input placeholder="0.0" value="2,000" /><button class="maxbtn">MAX</button></div>
+      <div class="hint">Balance 48,210 IPT</div>
+      <button class="cta">Bond extra →</button>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">02<span>Nominate</span></div>
+    <div>
+      <h2>Choose your validators</h2>
+      <p class="d">Back up to 16 validators by their stash address. We verify each one is active and show its commission.</p>
+      <div class="vrow"><span class="addr">0xa1F2…7c9B</span><span class="tag ok">3% commission</span></div>
+      <div class="vrow"><span class="addr">0x4D88…12aE</span><span class="tag ok">5% commission</span></div>
+      <div class="vrow"><span class="addr">0x90F7…b906</span><span class="tag warn">blocked</span></div>
+      <button class="addv">+ Add validator (3/16)</button>
+      <div><button class="cta" style="margin-top:24px">Nominate →</button></div>
+    </div>
+  </section>
+
+  <section class="step" style="border-bottom:none">
+    <div class="num">03<span>Manage</span></div>
+    <div>
+      <h2>Unbond or stop nominating</h2>
+      <p class="d">Unbonded IPT is locked for the ~28-day bonding period before it can be withdrawn.</p>
+      <div class="field"><label>Unbond amount</label><input placeholder="0.0" /></div>
+      <div style="display:flex;gap:14px;margin-top:24px">
+        <button class="cta">Unbond →</button>
+        <button class="cta line">Stop nominating</button>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

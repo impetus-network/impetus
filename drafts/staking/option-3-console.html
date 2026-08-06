@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Staking — Option 3 · Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --black:#0a0a0a;--gray:#6a6a6a;--cream:#fffaf0;--cream2:#f5f0e0;--panel:#fff;
+    --pink:#ff4d8b;--lav:#b8a4ed;--ochre:#e8b94a;--teal:#1a3a3a;--green:#22c55e;--line:#ece5d6;
+    --mono:'Geist Mono',monospace;--sans:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--cream);color:var(--black);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 28px 70px}
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+  .head .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--gray);font-weight:600}
+  .head h1{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+  .conn{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 14px}
+  .conn .dot{width:8px;height:8px;border-radius:99px;background:var(--green)}
+
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start}
+
+  .rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:16px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .box .bh{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .box .bh h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--gray)}
+  .box .bh .tag{font-size:11px;font-weight:700;color:#15803d;background:rgba(34,197,94,.14);padding:3px 9px;border-radius:99px}
+  .box .bd{padding:18px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--gray);margin-bottom:7px}
+  .field{position:relative;margin-bottom:12px}
+  input{width:100%;font-family:var(--mono);font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--cream);outline:none}
+  input:focus{border-color:var(--black)}
+  .maxbtn{position:absolute;right:9px;top:31px;font-size:10px;font-weight:800;color:var(--pink);background:none;border:none;cursor:pointer}
+  .hint{font-size:12px;color:var(--gray);margin:2px 0 12px}
+  .btn{width:100%;border:none;border-radius:11px;padding:12px;font-weight:700;font-size:14px;background:var(--black);color:#fff;cursor:pointer;transition:transform .12s}
+  .btn:hover{transform:translateY(-1px)} .btn.alt{background:var(--pink)}
+  .seg{display:flex;background:var(--cream2);border-radius:11px;padding:3px;margin-bottom:16px}
+  .seg button{flex:1;border:none;background:none;padding:8px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;color:var(--gray)}
+  .seg button.on{background:var(--panel);color:var(--black);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+  /* right column */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .stat .c{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gray)}
+  .stat .v{font-family:var(--mono);font-size:26px;font-weight:600;margin-top:10px;letter-spacing:-.02em}
+  .stat.accent{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .stat.accent .c{color:rgba(255,255,255,.65)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);font-weight:600;padding:12px 18px;border-bottom:1px solid var(--line)}
+  td{padding:13px 18px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  tr:last-child td{border-bottom:none}
+  td.name{font-family:var(--sans);font-weight:600}
+  .pill{font-family:var(--sans);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+  .pill.ok{background:rgba(34,197,94,.14);color:#15803d} .pill.warn{background:rgba(143,29,20,.12);color:#8f1d14}
+  .pill.you{background:var(--lav);color:#0a0a0a}
+  .mini{font-size:11px;font-weight:700;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 10px;cursor:pointer}
+  .bar{height:6px;border-radius:99px;background:var(--cream2);overflow:hidden;width:90px;display:inline-block;vertical-align:middle}
+  .bar i{display:block;height:100%;background:var(--ochre)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div><div class="eyebrow">Nominated proof-of-stake</div><h1>Staking console</h1></div>
+    <div class="conn"><span class="dot"></span> 0xd2aE…b872 · 48,210 IPT</div>
+  </div>
+
+  <div class="grid">
+    <!-- left action rail -->
+    <div class="rail">
+      <div class="box">
+        <div class="bh"><h3>Position</h3><span class="tag">Bonded</span></div>
+        <div class="bd">
+          <div class="seg"><button class="on">Bond</button><button>Unbond</button></div>
+          <div class="field"><label>Amount to bond (IPT)</label><input value="2,000" /><button class="maxbtn">MAX</button></div>
+          <div class="hint">Active 12,500 · Total 12,500 · Unlocking 0</div>
+          <button class="btn">Bond extra</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="bh"><h3>Nominate</h3><span style="font-family:var(--mono);font-size:11px;color:var(--gray)">3/16</span></div>
+        <div class="bd">
+          <div class="field"><input style="font-size:13px" value="0xa1F2…7c9B" /></div>
+          <div class="field"><input style="font-size:13px" value="0x4D88…12aE" /></div>
+          <div class="field" style="margin-bottom:8px"><input style="font-size:13px" placeholder="0x… add validator" /></div>
+          <button class="btn alt">Nominate selected</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- right live data -->
+    <div>
+      <div class="stats">
+        <div class="stat accent"><div class="c">Active stake</div><div class="v">12,500</div></div>
+        <div class="stat"><div class="c">Nominating</div><div class="v">5</div></div>
+        <div class="stat"><div class="c">Active era</div><div class="v">342</div></div>
+        <div class="stat"><div class="c">Est. APY</div><div class="v">11.8%</div></div>
+      </div>
+
+      <div class="box">
+        <div class="bh"><h3>Validator set — era 342</h3><span style="font-size:11px;color:var(--gray)">5 active · 32 cap</span></div>
+        <table>
+          <thead><tr><th>Validator</th><th>Commission</th><th>Own stake</th><th>Capacity</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="name">validator-1 <span style="color:var(--gray);font-weight:400">0xa1F2…7c9B</span></td><td>3%</td><td>50,000</td><td><span class="bar"><i style="width:62%"></i></span></td><td><span class="pill you">nominated</span></td><td><button class="mini">remove</button></td></tr>
+            <tr><td class="name">validator-2 <span style="color:var(--gray);font-weight:400">0x4D88…12aE</span></td><td>5%</td><td>50,000</td><td><span class="bar"><i style="width:74%"></i></span></td><td><span class="pill you">nominated</span></td><td><button class="mini">remove</button></td></tr>
+            <tr><td class="name">validator-3 <span style="color:var(--gray);font-weight:400">0x7Bc1…0fE2</span></td><td>4%</td><td>50,000</td><td><span class="bar"><i style="width:48%"></i></span></td><td><span class="pill ok">open</span></td><td><button class="mini">+ add</button></td></tr>
+            <tr><td class="name">validator-4 <span style="color:var(--gray);font-weight:400">0x33aD…99c0</span></td><td>10%</td><td>50,000</td><td><span class="bar"><i style="width:91%"></i></span></td><td><span class="pill ok">open</span></td><td><button class="mini">+ add</button></td></tr>
+            <tr><td class="name">validator-5 <span style="color:var(--gray);font-weight:400">0x90F7…b906</span></td><td>—</td><td>50,000</td><td><span class="bar"><i style="width:100%;background:#8f1d14"></i></span></td><td><span class="pill warn">blocked</span></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

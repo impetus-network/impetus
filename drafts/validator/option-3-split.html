@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Validator — Option 3 · Guide + console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--black:#0a0a0a;--gray:#6a6a6a;--cream:#fffaf0;--cream2:#f5f0e0;--pink:#ff4d8b;--lav:#b8a4ed;--ochre:#e8b94a;--teal:#1a3a3a;--green:#22c55e;--line:#ece5d6;--mono:'Geist Mono',monospace;--sans:'Inter',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--cream);color:var(--black);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto;padding:36px 28px 70px}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--gray);font-weight:700}
+  h1{font-size:46px;font-weight:800;letter-spacing:-.03em;margin:8px 0 8px}
+  .lede{font-size:16px;color:var(--gray);max-width:560px}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:26px;margin-top:30px;align-items:start}
+  /* left guide */
+  .step{display:grid;grid-template-columns:62px 1fr;gap:18px;padding:26px 0;border-top:1px solid var(--line)}
+  .step:first-child{border-top:none;padding-top:6px}
+  .num{font-size:42px;font-weight:800;letter-spacing:-.04em;line-height:.85}
+  .step h3{font-size:21px;font-weight:800;margin-bottom:6px}
+  .step p{color:var(--gray);font-size:14px;line-height:1.55;max-width:520px;margin-bottom:14px}
+  .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);background:var(--cream2);padding:3px 9px;border-radius:99px;margin-left:8px;vertical-align:middle}
+  pre{background:var(--teal);color:#e9efe9;border-radius:13px;padding:14px 16px;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.65}
+  pre .c{color:#9fb3a8}
+  /* right console */
+  .console{position:sticky;top:28px;display:flex;flex-direction:column;gap:16px}
+  .box{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .bh{padding:13px 17px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--gray)}
+  .bd{padding:17px}
+  .chk{display:flex;gap:11px;align-items:flex-start;padding:9px 0}
+  .chk+.chk{border-top:1px solid #f2ece0}
+  .ic{width:20px;height:20px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px}
+  .ic.on{background:var(--green);color:#fff} .ic.off{border:1px solid #d8cfba;color:#b3a991}
+  .chk .t{font-size:13px;font-weight:700} .chk .s{font-size:12px;color:var(--gray)}
+  label{display:block;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:7px}
+  input{width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--cream);outline:none;margin-bottom:11px}
+  .btn{width:100%;border:none;border-radius:11px;padding:11px;font-weight:800;font-size:13px;cursor:pointer}
+  .btn.k{background:var(--black);color:#fff} .btn.v{background:var(--pink);color:#fff}
+  .small{font-size:11px;color:var(--gray);margin:-4px 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Run a node</div>
+  <h1>Become a validator</h1>
+  <p class="lede">Read the steps on the left; do the on-chain actions on the right. The console tracks your progress.</p>
+
+  <div class="grid">
+    <div>
+      <div class="step"><div class="num">01</div><div><h3>Run &amp; sync a node</h3><p>Warp-sync a validator node against the canonical spec. Keep unsafe RPC on localhost.</p>
+        <pre><span class="c"># docker run … --validator --sync warp --rpc-methods unsafe</span>
+docker logs -f impetus-validator</pre></div></div>
+      <div class="step"><div class="num">02</div><div><h3>Generate session keys</h3><p>Ask the node for a fresh 128-byte bundle; copy the 0x result for the console →.</p>
+        <pre>curl … '{"method":"author_rotateKeys"}' http://127.0.0.1:9944</pre></div></div>
+      <div class="step"><div class="num">03</div><div><h3>Bond your stake <span class="tag">on-chain</span></h3><p>Bond ≥ 1,000 IPT from the stash you will validate with. Use the Staking page, then return.</p></div></div>
+      <div class="step"><div class="num">04</div><div><h3>Register session keys <span class="tag">on-chain</span></h3><p>Submit the bundle via Session (0x0818) — see the console panel.</p></div></div>
+      <div class="step"><div class="num">05</div><div><h3>Start validating <span class="tag">on-chain</span></h3><p>Declare intent + commission via Staking (0x0810).</p></div></div>
+      <div class="step"><div class="num">06</div><div><h3>Get elected</h3><p>The next era picks the top validators by stake. Stay online and keep keys current.</p></div></div>
+    </div>
+
+    <div class="console">
+      <div class="box">
+        <div class="bh">Your readiness</div>
+        <div class="bd">
+          <div class="chk"><span class="ic on">✓</span><div><div class="t">Bonded ≥ 1,000 IPT</div><div class="s">Active: 1,500 IPT</div></div></div>
+          <div class="chk"><span class="ic off"></span><div><div class="t">Session keys registered</div><div class="s">Run rotateKeys, then setKeys</div></div></div>
+          <div class="chk"><span class="ic off"></span><div><div class="t">Validating</div><div class="s">Call validate() to finish</div></div></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bh">Register keys · 0x0818</div>
+        <div class="bd">
+          <label>Session keys (rotateKeys output)</label>
+          <input value="0x8af3c1…e90b42" />
+          <button class="btn k">Register session keys</button>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bh">Start validating · 0x0810</div>
+        <div class="bd">
+          <label>Commission (%)</label>
+          <input value="5" style="max-width:120px" />
+          <div class="small">Share of rewards you keep before nominators.</div>
+          <button class="btn v">Start validating</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

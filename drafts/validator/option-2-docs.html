@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Validator — Option 2 · Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--black:#0a0a0a;--gray:#6a6a6a;--cream:#fffaf0;--cream2:#f5f0e0;--pink:#ff4d8b;--lav:#b8a4ed;--ochre:#e8b94a;--teal:#1a3a3a;--green:#22c55e;--line:#ece5d6;--mono:'Geist Mono',monospace;--sans:'Inter',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--cream);color:var(--black);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 28px 80px;display:grid;grid-template-columns:230px 1fr;gap:48px;align-items:start}
+  /* TOC */
+  .toc{position:sticky;top:36px}
+  .toc .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gray);font-weight:700;margin-bottom:14px}
+  .toc a{display:block;font-size:14px;color:var(--gray);text-decoration:none;padding:7px 12px;border-left:2px solid var(--line);font-weight:500}
+  .toc a.on{color:var(--black);border-left-color:var(--pink);font-weight:700;background:var(--cream2)}
+  .toc a:hover{color:var(--black)}
+  /* content */
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--gray);font-weight:700}
+  h1{font-size:48px;font-weight:800;letter-spacing:-.03em;margin:8px 0 14px}
+  .lede{font-size:17px;color:var(--gray);line-height:1.5;max-width:620px;margin-bottom:32px}
+  .callout{border:1px solid var(--ochre);background:#fdf6e3;border-radius:16px;padding:18px 20px;margin-bottom:36px}
+  .callout b{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7a5a12}
+  .callout ul{margin:10px 0 0 18px;color:#3a3a3a;font-size:14px;line-height:1.6}
+  h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:40px 0 6px;scroll-margin-top:36px}
+  h2 .n{color:var(--pink);font-family:var(--mono);font-size:18px;margin-right:8px}
+  p.b{color:#3a3a3a;font-size:15px;line-height:1.6;max-width:620px;margin-bottom:16px}
+  pre{background:var(--teal);color:#e9efe9;border-radius:14px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;margin-bottom:14px}
+  pre .c{color:#9fb3a8}
+  .inline{background:var(--cream2);font-family:var(--mono);font-size:12px;padding:2px 6px;border-radius:6px}
+  .actioncard{border:1px solid var(--line);background:#fff;border-radius:16px;padding:18px;margin:14px 0}
+  .actioncard label{display:block;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:7px}
+  .actioncard input{width:100%;font-family:var(--mono);font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--cream);outline:none}
+  .actioncard .go{margin-top:12px;border:none;background:var(--black);color:#fff;border-radius:11px;padding:11px 18px;font-weight:800;font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="toc">
+    <div class="lbl">On this page</div>
+    <a href="#req">Requirements</a>
+    <a href="#run" class="on">1 · Run a node</a>
+    <a href="#keys">2 · Session keys</a>
+    <a href="#bond">3 · Bond stake</a>
+    <a href="#set">4 · Register keys</a>
+    <a href="#validate">5 · Validate</a>
+    <a href="#elected">6 · Get elected</a>
+  </nav>
+  <main>
+    <div class="eyebrow">Run a node</div>
+    <h1>Validator guide</h1>
+    <p class="lede">Everything to take an Impetus node from zero to an elected validator. Follow top to bottom.</p>
+
+    <div class="callout">
+      <b>Before you start</b>
+      <ul>
+        <li>Canary network — you need a reachable <b>public bootnode</b> to peer from outside.</li>
+        <li>Active set capped at <b>32</b>, elected by stake each era. Registering ≠ elected.</li>
+        <li>Validators can be <b>slashed</b> for equivocation or downtime.</li>
+      </ul>
+    </div>
+
+    <h2 id="run"><span class="n">1</span>Run a node</h2>
+    <p class="b">Start a validator node against the canonical chain spec and warp-sync to the finalized head. Keep the unsafe RPC on localhost.</p>
+    <pre><span class="c"># Docker — RPC bound to localhost (unsafe methods needed next)</span>
+docker run -d --name impetus-validator --restart unless-stopped \
+  -p 127.0.0.1:9944:9944 -p 30333:30333 -v impetus-data:/data \
+  -v "$PWD/impetus.json:/spec.json:ro" \
+  --entrypoint impetus-node tranhuyduan/impetus-railway:v0.3.0 \
+  --base-path /data --chain /spec.json --validator --sync warp \
+  --rpc-methods unsafe --bootnodes "&lt;PUBLIC_BOOTNODE&gt;"</pre>
+    <p class="b">Or run the repo helper: <span class="inline">SPEC=./impetus.json ROLE=validator apps/node/scripts/run-node.sh</span></p>
+
+    <h2 id="keys"><span class="n">2</span>Generate session keys</h2>
+    <p class="b">Ask the node for a fresh key bundle. Copy the <span class="inline">result</span> 0x value for step 4.</p>
+    <pre>curl -s -H 'Content-Type: application/json' \
+  -d '{"id":1,"jsonrpc":"2.0","method":"author_rotateKeys","params":[]}' \
+  http://127.0.0.1:9944
+<span class="c"># => {"result":"0x&lt;256 hex chars&gt;"}</span></pre>
+
+    <h2 id="set"><span class="n">4</span>Register keys</h2>
+    <p class="b">Submit the bundle via the Session precompile (0x0818).</p>
+    <div class="actioncard">
+      <label>Session keys (author_rotateKeys output)</label>
+      <input value="0x8af3c1…e90b42" />
+      <button class="go">Register session keys</button>
+    </div>
+  </main>
+</div>
+</body>
+</html>

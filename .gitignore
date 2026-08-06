@@ -29,3 +29,6 @@ apps/node/.tokenomics-spec.md
 # macOS + local agent state
 .DS_Store
 .claude/
+
+# Graphify local output
+graphify-out/
